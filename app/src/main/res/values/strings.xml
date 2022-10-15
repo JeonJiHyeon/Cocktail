@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Cocktail</string>
+    <string name="title_recipe">Recipe</string>
+    <string name="title_home">Home</string>
+    <string name="title_mypage">Mypage</string>
+    <string name="title_ingredient">Ingredient</string>
+</resources>
