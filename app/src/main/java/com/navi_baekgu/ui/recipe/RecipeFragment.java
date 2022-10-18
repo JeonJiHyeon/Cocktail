@@ -26,14 +26,6 @@ public class RecipeFragment extends Fragment {
 
         binding = FragmentRecipeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        final TextView textView = binding.textRecipe;
-        recipeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
         return root;
     }
 
