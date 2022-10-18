@@ -10,23 +10,63 @@
         android:id="@+id/navigation_recipe"
         android:name="com.navi_baekgu.ui.recipe.RecipeFragment"
         android:label="@string/title_recipe"
-        tools:layout="@layout/fragment_recipe"/>
+        tools:layout="@layout/fragment_recipe">
+        <action
+            android:id="@+id/action_navigation_recipe_to_navigation_ingredient"
+            app:destination="@id/navigation_ingredient" />
+        <action
+            android:id="@+id/action_navigation_recipe_to_navigation_home"
+            app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_navigation_recipe_to_navigation_mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_ingredient"
         android:name="com.navi_baekgu.ui.ingredient.IngredientFragment"
         android:label="@string/title_ingredient"
-        tools:layout="@layout/fragment_ingredient"/>
+        tools:layout="@layout/fragment_ingredient">
+        <action
+            android:id="@+id/action_navigation_ingredient_to_navigation_recipe"
+            app:destination="@id/navigation_recipe" />
+        <action
+            android:id="@+id/action_navigation_ingredient_to_navigation_home"
+            app:destination="@id/navigation_home" />
+        <action
+            android:id="@+id/action_navigation_ingredient_to_navigation_mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.navi_baekgu.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home"/>
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_mypage"
+            app:destination="@id/navigation_mypage" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_recipe"
+            app:destination="@id/navigation_recipe" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_ingredient"
+            app:destination="@id/navigation_ingredient" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_mypage"
         android:name="com.navi_baekgu.ui.mypage.MypageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_mypage"/>
+        tools:layout="@layout/fragment_mypage">
+        <action
+            android:id="@+id/action_navigation_mypage_to_navigation_ingredient"
+            app:destination="@id/navigation_ingredient" />
+        <action
+            android:id="@+id/action_navigation_mypage_to_navigation_recipe"
+            app:destination="@id/navigation_recipe" />
+        <action
+            android:id="@+id/action_navigation_mypage_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
 
 
 </navigation>
