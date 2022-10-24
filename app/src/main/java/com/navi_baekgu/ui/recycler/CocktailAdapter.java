@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,6 +46,18 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
         public ViewHolder(LayoutCardviewBinding binding){
             super(binding.getRoot());
             this.binding = binding;
+
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = getAdapterPosition() ;
+                    if (pos != RecyclerView.NO_POSITION) {
+                        Toast.makeText(view.getContext(), binding.getPos()+1+"번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            });
+
         }
 
 

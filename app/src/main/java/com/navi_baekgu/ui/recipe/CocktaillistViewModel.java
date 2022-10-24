@@ -52,6 +52,10 @@ public class CocktaillistViewModel extends ViewModel {
         return cocktails.get(pos).gettag();
     }
 
+    public void setname(int pos,String str){
+        cocktails.get(pos).setname(str);
+    }
+
 
 
 

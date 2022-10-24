@@ -26,6 +26,8 @@ public class CocktaillistActivity extends AppCompatActivity {
         binding.setLifecycleOwner(this);
 
 
+
+
     }
 
 }
