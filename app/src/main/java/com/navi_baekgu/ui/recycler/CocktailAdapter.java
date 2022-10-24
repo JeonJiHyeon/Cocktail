@@ -53,7 +53,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                     int pos = getAdapterPosition() ;
                     if (pos != RecyclerView.NO_POSITION) {
                         Toast.makeText(view.getContext(), binding.getPos()+1+"번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
-
+                        //여기서 그 프래그먼트랑 이어주기만 하면 되는데,, 어케,,?
                     }
                 }
             });
