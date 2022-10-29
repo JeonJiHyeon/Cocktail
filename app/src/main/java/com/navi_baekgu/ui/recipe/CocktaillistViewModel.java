@@ -1,5 +1,10 @@
 package com.navi_baekgu.ui.recipe;
 
+import android.content.Intent;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModel;
 
 import com.navi_baekgu.ui.recycler.Cocktail;
@@ -8,7 +13,8 @@ import com.navi_baekgu.ui.recycler.CocktailAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CocktaillistViewModel extends ViewModel {
+
+public class CocktaillistViewModel extends ViewModel  {
 
     private List<Cocktail> cocktails;
     private CocktailAdapter adapter;
