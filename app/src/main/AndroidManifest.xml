@@ -29,7 +29,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.recipe.CocktaillistActivity"/>
-
     </application>
 
 </manifest>
