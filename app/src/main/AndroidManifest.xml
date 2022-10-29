@@ -29,6 +29,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.recipe.CocktaillistActivity"/>
+        <activity android:name=".ui.recipe.DetailActivity"/>
+        <activity android:name=".ui.recipe.CameraguideActivity"/>
     </application>
 
 </manifest>
