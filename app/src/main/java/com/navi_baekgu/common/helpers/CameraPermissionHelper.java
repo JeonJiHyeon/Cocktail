@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.navi_baekgu;
+package com.navi_baekgu.common.helpers;
 
 import android.Manifest;
 import android.app.Activity;
