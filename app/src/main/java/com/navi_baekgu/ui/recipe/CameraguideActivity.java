@@ -1,5 +1,7 @@
 package com.navi_baekgu.ui.recipe;
 
+import static com.google.ar.core.Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL;
+
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.media.Image;
@@ -490,6 +492,7 @@ public class CameraguideActivity extends AppCompatActivity implements SampleRend
         // Show a message based on whether tracking has failed, if planes are detected, and if the user
         // has placed any objects.
         String message = null;
+
         if (camera.getTrackingState() == TrackingState.PAUSED) {
             if (camera.getTrackingFailureReason() == TrackingFailureReason.NONE) {
                 message = SEARCHING_PLANE_MESSAGE;
@@ -805,6 +808,7 @@ public class CameraguideActivity extends AppCompatActivity implements SampleRend
     private void configureSession() {
         Config config = session.getConfig();
         config.setLightEstimationMode(Config.LightEstimationMode.ENVIRONMENTAL_HDR);
+
         if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
             config.setDepthMode(Config.DepthMode.AUTOMATIC);
         } else {
