@@ -46,7 +46,6 @@ public class CameraguideActivity extends AppCompatActivity  implements
     private Integer numberOfAnchors = 0;
 
 
-
     //지금 선택한 노드를 가르킬것 - height 측정시 사용됨
     private AnchorNode selectedAnchorNode = null;
 
@@ -56,8 +55,9 @@ public class CameraguideActivity extends AppCompatActivity  implements
     private FloatingActionButton heightButton;
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
-    private final Color color = new Color(android.graphics.Color.parseColor("#FF7390"));
+    private final Color color = new Color(android.graphics.Color.parseColor("#ff0051"));
     private Renderable sphere;
+
 
 //        히트말고 버튼이벤트로 노드 생성하기
 //    public void planetrack(Renderable model, FloatingActionButton button) {
@@ -94,7 +94,6 @@ public class CameraguideActivity extends AppCompatActivity  implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cameraguide);
-
         getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, fragment) -> {
             if (fragment.getId() == R.id.arFragment) {
                 arFragment = (ArFragment) fragment;
@@ -113,7 +112,9 @@ public class CameraguideActivity extends AppCompatActivity  implements
         //모델과 텍스처를 초기화시키고 그것을 계속 재사용하는거랑 같음!!
         MaterialFactory.makeOpaqueWithColor(this, color)
                 .thenAccept(material -> {
-                    sphere = ShapeFactory.makeSphere(0.01f, Vector3.zero(), material);
+                    sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
+                    sphere.setShadowCaster(false);
+                    sphere.setShadowReceiver(false);
                 });
 
 //        히트말고 버튼이벤트로 노드 생성하기
@@ -174,15 +175,19 @@ public class CameraguideActivity extends AppCompatActivity  implements
 
         //벽을 평면으로 감지하지 못한 경우에는 강제로 높이를 측정할 노드를 생성시킴
         heightButton = findViewById(R.id.height);
+
         heightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //height mode
-                if (numberOfAnchors != 0 && numberOfAnchors <= MAX_ANCHORS) {
+                if (numberOfAnchors != 0) {
                     //하나 이상 만들고, 2개 이하. 그니까 딱 하나만 만들었을때 새로운 노드를 만들어줌
-                    createAnchorNode_height();
-                }
-                else if(numberOfAnchors == 0){
+                    if (numberOfAnchors==MAX_ANCHORS && selectedAnchorNode==null)
+                        Toast.makeText(getBaseContext(), "You already create 2 nodes for measure width or height", Toast.LENGTH_SHORT).show();
+                    else createAnchorNode_height();
+                    }
+
+                else{
                     Toast.makeText(getBaseContext(), "You must create 1 node", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -198,6 +203,7 @@ public class CameraguideActivity extends AppCompatActivity  implements
         anchorNodeList.get(numberOfAnchors-1).setParent(null);
         anchorNodeList.remove(numberOfAnchors-1);
         numberOfAnchors--;
+        selectedAnchorNode = null;
     }
 
     @Override
@@ -210,15 +216,8 @@ public class CameraguideActivity extends AppCompatActivity  implements
             anchorNode.setRenderable(sphere); //아까 만든 구
 
             //노드가 너무 크면 의도치않은 오차 및 보기가 힘들어서 줄여버림
-            anchorNode.setLocalScale(new Vector3(0.7f, 0.7f, 0.7f));
+            anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
 
-            // Create the transformable model and add it to the anchor.
-            TransformableNode modelNode = new TransformableNode(arFragment.getTransformationSystem());
-            modelNode.setLocalScale(new Vector3(0.7f, 0.7f, 0.7f));
-            modelNode.setParent(anchorNode);
-            RenderableInstance modelInstance = modelNode.setRenderable(sphere);
-            modelInstance.getMaterial().setInt("baseColorIndex", 0);
-            modelNode.select();
             anchorNodeList.add(anchorNode);
             numberOfAnchors++;
 
@@ -264,15 +263,8 @@ public class CameraguideActivity extends AppCompatActivity  implements
             AnchorNode anchorNode = new AnchorNode(anchor);
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             anchorNode.setRenderable(sphere);
-            anchorNode.setLocalScale(new Vector3(0.7f, 0.7f, 0.7f));
+            anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
 
-            // Create the transformable model and add it to the anchor.
-            TransformableNode modelNode = new TransformableNode(arFragment.getTransformationSystem());
-            modelNode.setLocalScale(new Vector3(0.7f, 0.7f, 0.7f));
-            modelNode.setParent(anchorNode);
-            RenderableInstance modelInstance = modelNode.setRenderable(sphere);
-            modelInstance.getMaterial().setInt("baseColorIndex", 0);
-            modelNode.select();
             //이후 한번 더 누르면 이 앵커를 이동시켜야하기때문에 이 노드를 선택시킴
             selectedAnchorNode = anchorNode;
             anchorNodeList.add(anchorNode);
@@ -297,6 +289,7 @@ public class CameraguideActivity extends AppCompatActivity  implements
         AnchorNode newanchorNode = new AnchorNode(anchor);
         newanchorNode.setRenderable(sphere);
         newanchorNode.setParent(arFragment.getArSceneView().getScene());
+        newanchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
         anchorNodeList.add(newanchorNode);
         return newanchorNode;
     }
