@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,8 +30,10 @@ import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.rendering.RenderableInstance;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.rendering.Texture;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.BaseArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
+import com.navi_baekgu.MainActivity;
 import com.navi_baekgu.R;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -57,6 +61,11 @@ public class CameraguideActivity extends AppCompatActivity  implements
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
     private final Color color = new Color(android.graphics.Color.parseColor("#ff0051"));
     private Renderable sphere;
+    private ViewRenderable renderable_ui;
+
+    private AnchorNode resultanchor;
+
+
 
 
 //        히트말고 버튼이벤트로 노드 생성하기
@@ -116,45 +125,25 @@ public class CameraguideActivity extends AppCompatActivity  implements
                     sphere.setShadowCaster(false);
                     sphere.setShadowReceiver(false);
                 });
+        //2d ui를 띄운다. 카메라 유아이라는 xml을 따로 만들어서 뷰 렌더러블 클래스에 적용시킨것. 적용시키는 방법은 위에 있던것들하고 동일
+        WeakReference<CameraguideActivity> weakActivity = new WeakReference<>(this);
+        ViewRenderable.builder()
+                .setView(this, R.layout.camera_ui)
+                .build()
+                .thenAccept(renderable -> {
+                    Toast.makeText(this, "try to load model", Toast.LENGTH_SHORT).show();
 
-//        히트말고 버튼이벤트로 노드 생성하기
-//        View view = ((LayoutInflater) context
-//                .getSystemService(Service.LAYOUT_INFLATER_SERVICE))
-//                .inflate(configuration.getLayoutId(), null);
-//
-//
-//        CompletableFuture<ViewRenderable> viewRenderable = ViewRenderable
-//                .builder()
-//                .setView(context, view)
-//                .build();
-//
-//        Frame frame = arFragment.getArSceneView().getArFrame();
-//        Session session = arFragment.getArSceneView().getSession();
-//        for (Plane plane : frame.getUpdatedTrackables(Plane.class)) {
-//            if (plane.getTrackingState() == TrackingState.TRACKING) {
-//                Anchor plane_anchor = session.createAnchor(plane.getCenterPose());
-//                AnchorNode anchorNode = new AnchorNode(plane_anchor);
-//                anchorNode.setParent(arFragment.getArSceneView().getScene());
-//
-//                if (!node.isEnabled())
-//                    return;
-//
-//                Pose hitPose = hit.getHitPose();
-//                Vector3 oldPosition = node.getWorldPosition();
-//                Vector3 desiredPosition = new Vector3(
-//                        hitPose.tx(),
-//                        hitPose.ty(),
-//                        hitPose.tz());
-//
-//                node.setWorldPosition(desiredPosition);
-//
-//                Quaternion rotation1 = Quaternion.axisAngle(new Vector3(1.0f, 0.0f, 0.0f), 90);
-//                node.setWorldRotation(rotation1);
-//
-//
-//
-//            }
-//        }
+                    CameraguideActivity activity = weakActivity.get();
+                    if (activity != null) {
+                        Toast.makeText(this, "not null", Toast.LENGTH_SHORT).show();
+                        activity.renderable_ui = renderable;
+                        renderable_ui.setShadowReceiver(false);
+                        renderable_ui.setShadowCaster(false);
+                    }
+                }).exceptionally(throwable -> {
+                    Toast.makeText(this, "Unable to load model", Toast.LENGTH_LONG).show();
+                    return null;
+                });
 
         //생성된 노드를 삭제하는 버튼 - 가장 최근에 만든 버튼부터 삭제
         deleteButton = findViewById(R.id.delete);
@@ -224,7 +213,16 @@ public class CameraguideActivity extends AppCompatActivity  implements
         } else { //2번 이상 터치(이미 노드가 2번 생성됨)시 무조건 계산
             Log.d(TAG,"MAX_ANCHORS exceeded");
             Toast.makeText(this, "Calc distance", Toast.LENGTH_SHORT).show();
-            Calc_distance();
+            //계속 생성되는걸 막기 위해서 처음에 비어있지 않으면 떼라고 했음
+            if(resultanchor != null){
+                resultanchor.getAnchor().detach();
+                resultanchor.setParent(null);
+                Calc_distance();
+            }
+            else{
+                Calc_distance();
+            }
+
         }
     }
 
@@ -235,20 +233,33 @@ public class CameraguideActivity extends AppCompatActivity  implements
         //유클리디안 거리 계산 및, 소수점 두자리까지 반영
         double result = Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2)) * 100) / 100.0;
 
-        //alert를 이용하여 결과를 표현했지만, arcore에서 ui/ux 디자인시 비추함 - 2d요소를 렌더링해서 보여주는 방법을 추후에 업데이트하는편이 좋음
-        AlertDialog.Builder myAlertBuilder =
-                new AlertDialog.Builder(CameraguideActivity.this);
-        // alert의 title과 Messege 세팅
-        myAlertBuilder.setTitle("Result");
-        myAlertBuilder.setMessage("Result : " + result + "m that is " + (result * 100) +"cm");
-        // 버튼 추가
-        myAlertBuilder.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialog,int which){
-                Toast.makeText(getApplicationContext(),"Pressed OK",
-                        Toast.LENGTH_SHORT).show();
+        float mid_x = (anchorNodeList.get(0).getWorldPosition().x + anchorNodeList.get(1).getWorldPosition().x) /2;
+        float mid_y = (anchorNodeList.get(0).getWorldPosition().y + anchorNodeList.get(1).getWorldPosition().y) /2;
+        float mid_z = (anchorNodeList.get(0).getWorldPosition().z + anchorNodeList.get(1).getWorldPosition().z) /2;
+        float[] mid = {mid_x,mid_y,mid_z};
+        float[] mid_q = {0.0f,0.0f,0.0f,0.0f};
+        Pose midPosition = new Pose(mid,mid_q);
+
+        //2d ui를 렌더링함. 방법 : 그냥 두 점 사이 중간값을 측정해서 노드 추가하고 그 위치에 띄워준 것.
+        Session session = arFragment.getArSceneView().getSession();
+        Anchor anchor = session.createAnchor(midPosition);
+        resultanchor = new AnchorNode(anchor);
+        resultanchor.setParent(arFragment.getArSceneView().getScene());
+        resultanchor.setEnabled(true);
+        //결과 넣기
+        TextView text = renderable_ui.getView().findViewById(R.id.result_text);
+        text.setText( (result * 100)+"cm");
+        //닫기 누르면 사라지도록
+        renderable_ui.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
+                resultanchor.setEnabled(false);
             }
         });
-        myAlertBuilder.show();
+        resultanchor.setRenderable(renderable_ui);
+        resultanchor.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+
     }
 
     public void createAnchorNode_height(){
