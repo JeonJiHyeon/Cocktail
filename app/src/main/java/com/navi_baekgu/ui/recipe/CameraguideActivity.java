@@ -1,45 +1,40 @@
 package com.navi_baekgu.ui.recipe;
 
 import static com.google.ar.sceneform.rendering.HeadlessEngineWrapper.TAG;
-import java.lang.Math;
+
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.ar.core.Anchor;
-import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.MaterialFactory;
-import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
-import com.google.ar.sceneform.rendering.RenderableInstance;
 import com.google.ar.sceneform.rendering.ShapeFactory;
-import com.google.ar.sceneform.rendering.Texture;
+import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.BaseArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
 import com.navi_baekgu.R;
-import java.lang.ref.WeakReference;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.google.ar.sceneform.ux.ArFragment;
 
-public class CameraguideActivity extends AppCompatActivity  implements
+public class CameraguideActivity extends AppCompatActivity implements
         BaseArFragment.OnTapArPlaneListener {
     //최대 앵커 수를 2개로 제한함
-    private  static final int MAX_ANCHORS = 2;
+    private static final int MAX_ANCHORS = 2;
     //앵커노드리스트를 생성
     private List<AnchorNode> anchorNodeList = new ArrayList<>();
     //지금 몇개의 앵커가 있는지 저장할 변수
@@ -59,7 +54,7 @@ public class CameraguideActivity extends AppCompatActivity  implements
     private Renderable sphere;
 
 
-//        히트말고 버튼이벤트로 노드 생성하기
+    //        히트말고 버튼이벤트로 노드 생성하기
 //    public void planetrack(Renderable model, FloatingActionButton button) {
 //        Frame frame = arFragment.getArSceneView().getArFrame();
 //        for (Plane plane : frame.getUpdatedTrackables(Plane.class)) {
@@ -162,11 +157,10 @@ public class CameraguideActivity extends AppCompatActivity  implements
             @Override
             public void onClick(View view) {
                 //Delete the Anchor if it exists
-                Log.d(TAG,"Deleteing anchor");
-                if(numberOfAnchors != 0){
+                Log.d(TAG, "Deleteing anchor");
+                if (numberOfAnchors != 0) {
                     removeAnchorNode();
-                }
-                else {
+                } else {
                     Toast.makeText(getBaseContext(), "no nodes", Toast.LENGTH_SHORT).show();
                 }
 
@@ -182,12 +176,10 @@ public class CameraguideActivity extends AppCompatActivity  implements
                 //height mode
                 if (numberOfAnchors != 0) {
                     //하나 이상 만들고, 2개 이하. 그니까 딱 하나만 만들었을때 새로운 노드를 만들어줌
-                    if (numberOfAnchors==MAX_ANCHORS && selectedAnchorNode==null)
+                    if (numberOfAnchors == MAX_ANCHORS && selectedAnchorNode == null)
                         Toast.makeText(getBaseContext(), "You already create 2 nodes for measure width or height", Toast.LENGTH_SHORT).show();
                     else createAnchorNode_height();
-                    }
-
-                else{
+                } else {
                     Toast.makeText(getBaseContext(), "You must create 1 node", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -198,10 +190,10 @@ public class CameraguideActivity extends AppCompatActivity  implements
 
     private void removeAnchorNode() {
         //Remove an anchor node - 가장 뒤(최근)생성된 노드
-        arFragment.getArSceneView().getScene().removeChild(anchorNodeList.get(numberOfAnchors-1));
-        anchorNodeList.get(numberOfAnchors-1).getAnchor().detach();
-        anchorNodeList.get(numberOfAnchors-1).setParent(null);
-        anchorNodeList.remove(numberOfAnchors-1);
+        arFragment.getArSceneView().getScene().removeChild(anchorNodeList.get(numberOfAnchors - 1));
+        anchorNodeList.get(numberOfAnchors - 1).getAnchor().detach();
+        anchorNodeList.get(numberOfAnchors - 1).setParent(null);
+        anchorNodeList.remove(numberOfAnchors - 1);
         numberOfAnchors--;
         selectedAnchorNode = null;
     }
@@ -222,37 +214,37 @@ public class CameraguideActivity extends AppCompatActivity  implements
             numberOfAnchors++;
 
         } else { //2번 이상 터치(이미 노드가 2번 생성됨)시 무조건 계산
-            Log.d(TAG,"MAX_ANCHORS exceeded");
+            Log.d(TAG, "MAX_ANCHORS exceeded");
             Toast.makeText(this, "Calc distance", Toast.LENGTH_SHORT).show();
             Calc_distance();
         }
     }
 
-    public void Calc_distance(){
+    public void Calc_distance() {
         float x = anchorNodeList.get(0).getWorldPosition().x - anchorNodeList.get(1).getWorldPosition().x;
         float y = anchorNodeList.get(0).getWorldPosition().y - anchorNodeList.get(1).getWorldPosition().y;
         float z = anchorNodeList.get(0).getWorldPosition().z - anchorNodeList.get(1).getWorldPosition().z;
         //유클리디안 거리 계산 및, 소수점 두자리까지 반영
-        double result = Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2)) * 100) / 100.0;
+        double result = Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) * 100) / 100.0;
 
         //alert를 이용하여 결과를 표현했지만, arcore에서 ui/ux 디자인시 비추함 - 2d요소를 렌더링해서 보여주는 방법을 추후에 업데이트하는편이 좋음
         AlertDialog.Builder myAlertBuilder =
                 new AlertDialog.Builder(CameraguideActivity.this);
         // alert의 title과 Messege 세팅
         myAlertBuilder.setTitle("Result");
-        myAlertBuilder.setMessage("Result : " + result + "m that is " + (result * 100) +"cm");
+        myAlertBuilder.setMessage("Result : " + result + "m that is " + (result * 100) + "cm");
         // 버튼 추가
-        myAlertBuilder.setPositiveButton("Ok",new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialog,int which){
-                Toast.makeText(getApplicationContext(),"Pressed OK",
+        myAlertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "Pressed OK",
                         Toast.LENGTH_SHORT).show();
             }
         });
         myAlertBuilder.show();
     }
 
-    public void createAnchorNode_height(){
-        if(numberOfAnchors < MAX_ANCHORS) {
+    public void createAnchorNode_height() {
+        if (numberOfAnchors < MAX_ANCHORS) {
             //새로운 높이를 표현할 앵커 설치, 기준이 될 앵커의 pose를 가져옴 : 가장 처음에 만든 앵커의 포즈를 가져옴
             Pose standard = anchorNodeList.get(0).getAnchor().getPose();
             //그 포즈를 기준으로 y가 5cm 높은 pose를 생성
@@ -269,13 +261,12 @@ public class CameraguideActivity extends AppCompatActivity  implements
             selectedAnchorNode = anchorNode;
             anchorNodeList.add(anchorNode);
             numberOfAnchors++;
-        }
-        else{
+        } else {
             //노드가 2개 생성된 상태에서 한번 더 누르게 되면, 그 노드를 위로 이동시킴
             Anchor currentAnchor = selectedAnchorNode.getAnchor();
             //높이노드 생성시와 마찬가지로, 포즈를 가져와서 y를 이동시킨 pose를 만들어줌
             Pose oldPose = currentAnchor.getPose();
-            Pose newPose = oldPose.compose(Pose.makeTranslation(0,0.01f,0));
+            Pose newPose = oldPose.compose(Pose.makeTranslation(0, 0.01f, 0));
             selectedAnchorNode = moveRenderable(selectedAnchorNode, newPose);
         }
     }

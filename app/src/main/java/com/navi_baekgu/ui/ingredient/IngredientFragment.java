@@ -8,12 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.navi_baekgu.databinding.FragmentIngredientBinding;
@@ -32,14 +29,13 @@ public class IngredientFragment extends Fragment {
         View root = binding.getRoot();
 
 
-
         final ImageView imageView2 = binding.imageView2;
 
         ViewOutlineProvider mViewOutlineProvider = new ViewOutlineProvider() {
             @Override
             public void getOutline(final View view, final Outline outline) {
                 float cornerRadiusDP = 16f;
-                float cornerRadius = TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, cornerRadiusDP, getResources().getDisplayMetrics());
+                float cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, cornerRadiusDP, getResources().getDisplayMetrics());
                 outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
             }
         };

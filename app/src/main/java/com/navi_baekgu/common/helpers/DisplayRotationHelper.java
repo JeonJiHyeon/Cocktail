@@ -25,6 +25,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+
 import com.google.ar.core.Session;
 
 /**
@@ -52,12 +53,16 @@ public final class DisplayRotationHelper implements DisplayListener {
         display = windowManager.getDefaultDisplay();
     }
 
-    /** Registers the display listener. Should be called from {@link Activity#onResume()}. */
+    /**
+     * Registers the display listener. Should be called from {@link Activity#onResume()}.
+     */
     public void onResume() {
         displayManager.registerDisplayListener(this, null);
     }
 
-    /** Unregisters the display listener. Should be called from {@link Activity#onPause()}. */
+    /**
+     * Unregisters the display listener. Should be called from {@link Activity#onPause()}.
+     */
     public void onPause() {
         displayManager.unregisterDisplayListener(this);
     }
@@ -68,7 +73,7 @@ public final class DisplayRotationHelper implements DisplayListener {
      * android.opengl.GLSurfaceView.Renderer
      * #onSurfaceChanged(javax.microedition.khronos.opengles.GL10, int, int)}.
      *
-     * @param width the updated width of the surface.
+     * @param width  the updated width of the surface.
      * @param height the updated height of the surface.
      */
     public void onSurfaceChanged(int width, int height) {
@@ -94,8 +99,8 @@ public final class DisplayRotationHelper implements DisplayListener {
     }
 
     /**
-     *  Returns the aspect ratio of the GL surface viewport while accounting for the display rotation
-     *  relative to the device camera sensor orientation.
+     * Returns the aspect ratio of the GL surface viewport while accounting for the display rotation
+     * relative to the device camera sensor orientation.
      */
     public float getCameraSensorRelativeViewportAspectRatio(String cameraId) {
         float aspectRatio;
@@ -153,10 +158,12 @@ public final class DisplayRotationHelper implements DisplayListener {
     }
 
     @Override
-    public void onDisplayAdded(int displayId) {}
+    public void onDisplayAdded(int displayId) {
+    }
 
     @Override
-    public void onDisplayRemoved(int displayId) {}
+    public void onDisplayRemoved(int displayId) {
+    }
 
     @Override
     public void onDisplayChanged(int displayId) {

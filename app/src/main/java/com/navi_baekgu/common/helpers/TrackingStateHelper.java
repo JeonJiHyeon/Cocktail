@@ -2,11 +2,14 @@ package com.navi_baekgu.common.helpers;
 
 import android.app.Activity;
 import android.view.WindowManager;
+
 import com.google.ar.core.Camera;
 import com.google.ar.core.TrackingFailureReason;
 import com.google.ar.core.TrackingState;
 
-/** Gets human readibly tracking failure reasons and suggested actions. */
+/**
+ * Gets human readibly tracking failure reasons and suggested actions.
+ */
 public final class TrackingStateHelper {
     private static final String INSUFFICIENT_FEATURES_MESSAGE =
             "Can't find anything. Aim device at a surface with more texture or color.";
@@ -30,7 +33,9 @@ public final class TrackingStateHelper {
         this.activity = activity;
     }
 
-    /** Keep the screen unlocked while tracking, but allow it to lock when tracking stops. */
+    /**
+     * Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
+     */
     public void updateKeepScreenOnFlag(TrackingState trackingState) {
         if (trackingState == previousTrackingState) {
             return;

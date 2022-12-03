@@ -18,7 +18,9 @@ package com.navi_baekgu.common.helpers;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-/** Manages the Occlusion option setting and shared preferences. */
+/**
+ * Manages the Occlusion option setting and shared preferences.
+ */
 public class DepthSettings {
     public static final String SHARED_PREFERENCES_ID = "SHARED_PREFERENCES_OCCLUSION_OPTIONS";
     public static final String SHARED_PREFERENCES_SHOW_DEPTH_ENABLE_DIALOG_OOBE =
@@ -30,14 +32,18 @@ public class DepthSettings {
     private boolean useDepthForOcclusion = false;
     private SharedPreferences sharedPreferences;
 
-    /** Initializes the current settings based on when the app was last used. */
+    /**
+     * Initializes the current settings based on when the app was last used.
+     */
     public void onCreate(Context context) {
         sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_ID, Context.MODE_PRIVATE);
         useDepthForOcclusion =
                 sharedPreferences.getBoolean(SHARED_PREFERENCES_USE_DEPTH_FOR_OCCLUSION, false);
     }
 
-    /** Retrieves whether depth-based occlusion is enabled. */
+    /**
+     * Retrieves whether depth-based occlusion is enabled.
+     */
     public boolean useDepthForOcclusion() {
         return useDepthForOcclusion;
     }
@@ -54,7 +60,9 @@ public class DepthSettings {
         editor.apply();
     }
 
-    /** Retrieves whether to render the depth map visualization instead of the camera feed. */
+    /**
+     * Retrieves whether to render the depth map visualization instead of the camera feed.
+     */
     public boolean depthColorVisualizationEnabled() {
         return depthColorVisualizationEnabled;
     }
@@ -63,7 +71,9 @@ public class DepthSettings {
         this.depthColorVisualizationEnabled = depthColorVisualizationEnabled;
     }
 
-    /** Determines if the initial prompt to use depth-based occlusion should be shown. */
+    /**
+     * Determines if the initial prompt to use depth-based occlusion should be shown.
+     */
     public boolean shouldShowDepthEnableDialog() {
         // Checks if this dialog has been called before on this device.
         boolean showDialog =

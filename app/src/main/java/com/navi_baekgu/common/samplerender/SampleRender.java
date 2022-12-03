@@ -1,13 +1,15 @@
 package com.navi_baekgu.common.samplerender;
 
 import android.content.res.AssetManager;
-//import android.graphics.Shader;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/** A SampleRender context. */
+/**
+ * A SampleRender context.
+ */
 public class SampleRender {
     private static final String TAG = SampleRender.class.getSimpleName();
 
@@ -20,8 +22,8 @@ public class SampleRender {
      * Constructs a SampleRender object and instantiates GLSurfaceView parameters.
      *
      * @param glSurfaceView Android GLSurfaceView
-     * @param renderer Renderer implementation to receive callbacks
-     * @param assetManager AssetManager for loading Android resources
+     * @param renderer      Renderer implementation to receive callbacks
+     * @param assetManager  AssetManager for loading Android resources
      */
     public SampleRender(GLSurfaceView glSurfaceView, Renderer renderer, AssetManager assetManager) {
         this.assetManager = assetManager;
@@ -54,7 +56,9 @@ public class SampleRender {
         glSurfaceView.setWillNotDraw(false);
     }
 
-    /** Draw a {@link Mesh} with the specified {@link Shader}. */
+    /**
+     * Draw a {@link Mesh} with the specified {@link Shader}.
+     */
     public void draw(Mesh mesh, Shader shader) {
         draw(mesh, shader, /*framebuffer=*/ null);
     }
@@ -86,7 +90,9 @@ public class SampleRender {
         GLError.maybeThrowGLException("Failed to clear framebuffer", "glClear");
     }
 
-    /** Interface to be implemented for rendering callbacks. */
+    /**
+     * Interface to be implemented for rendering callbacks.
+     */
     public static interface Renderer {
         /**
          * Called by {@link SampleRender} when the GL render surface is created.

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.navi_baekgu.databinding.ActivityDetailBinding;
 
 public class DetailActivity extends AppCompatActivity {
