@@ -80,7 +80,8 @@ public class CameraguideActivity extends AppCompatActivity implements
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
     private final Color color = new Color(android.graphics.Color.parseColor("#ff0051"));
-    private Renderable sphere;
+    private final Color color2 = new Color(android.graphics.Color.parseColor("#ffdee8"));
+    private Renderable sphere, guide_sphere;
     private ViewRenderable renderable_ui_info, renderable_ui_result;
     private AnchorNode resultanchor;
 //</editor-fold desc="변수 생성구간">
@@ -123,6 +124,12 @@ public class CameraguideActivity extends AppCompatActivity implements
         MaterialFactory.makeOpaqueWithColor(this, color)
                 .thenAccept(material -> {
                     sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
+                    sphere.setShadowCaster(false);
+                    sphere.setShadowReceiver(false);
+                });
+        MaterialFactory.makeOpaqueWithColor(this, color2)
+                .thenAccept(material -> {
+                    guide_sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
                     sphere.setShadowCaster(false);
                     sphere.setShadowReceiver(false);
                 });
@@ -232,8 +239,20 @@ public class CameraguideActivity extends AppCompatActivity implements
                     Toast.makeText(CameraguideActivity.this, "높이 측정이 완료되지 않았습니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    //이 함수 아직 안만듬!
-                    //start_guide(cupname, cup_width, cup_height, width_pose, height_pose);
+                    //모든 ui 없애고 시작
+                    deleteButton.setVisibility(View.GONE);
+                    heightButton.setVisibility(View.GONE);
+                    mug_cup_btn.setVisibility(View.GONE);
+                    wine_glass_btn.setVisibility(View.GONE);
+                    cocktail_glass_btn.setVisibility(View.GONE);
+                    cancel_btn.setVisibility(View.GONE);
+                    complete_btn.setVisibility(View.GONE);
+                    result_.setVisibility(View.GONE);
+                    while (numberOfAnchors!=0) {
+                        deleteButton.performClick();
+                    }
+                    numberOfAnchors = MAX_ANCHORS;
+                    start_guide(cupname, cup_width, cup_height, width_pose, height_pose);
                 }
             }
         });
@@ -335,7 +354,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     Calc_distance("h");
                 }
                 else {
-                    Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "가이드를 따라 진행해주세요.", Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -469,5 +488,39 @@ public class CameraguideActivity extends AppCompatActivity implements
 
         return newanchorNode;
     }
+    //가이드 시작하는 함수
+    private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
+        switch (cupname){
+            case "mug":
+                //부피를 구하는 부분
+                //그래픽을 생성하는 부분 height pose는 따로 만질 필요가 없지만, 가로는 두 점을 회전시키면서 원을 만들어야 함.
+                //두 점을 그냥 동시에 회전시켜서 10개의 포지션을 만든 개별 앵커, 그걸 서로 이어서 원을 만들고, 내부는 반투명 렌더러블로 채워준다.
+                //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
+                Session session = arFragment.getArSceneView().getSession();
+                float[] quat = {0.0f,0.0f,0.f,0.0f};
+                //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성?
+                Pose newpose = width_pose[0].compose(Pose.makeRotation(0.0f, 1.0f, 0.0f,0.0f ));
 
+                Anchor anchor = session.createAnchor(newpose);
+                Anchor anchor1 = session.createAnchor(width_pose[0]);
+
+                AnchorNode anchorNode = new AnchorNode(anchor);
+                AnchorNode anchorNode1 = new AnchorNode(anchor1);
+
+                anchorNode.setParent(arFragment.getArSceneView().getScene());
+                anchorNode.setRenderable(guide_sphere);
+                anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+
+                anchorNode1.setParent(arFragment.getArSceneView().getScene());
+                anchorNode1.setRenderable(sphere);
+                anchorNode1.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+                break;
+            case "wine":
+                break;
+            case "tri":
+                break;
+            default:
+                break;
+        }
+    }
 }
