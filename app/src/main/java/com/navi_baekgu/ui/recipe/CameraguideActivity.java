@@ -73,10 +73,9 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Button wine_glass_btn;
     private Button cocktail_glass_btn;
     private Button cancel_btn;
-    private Button cup_width_btn;
-    private Button cup_height_btn;
-    private Button mode_text;
-
+    private Button complete_btn;
+    private Button result_;
+    private String cupname;
 
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
@@ -100,10 +99,9 @@ public class CameraguideActivity extends AppCompatActivity implements
         cocktail_glass_btn = findViewById(R.id.cocktail_glass_btn);
         deleteButton = findViewById(R.id.delete);
         cancel_btn = findViewById(R.id.cancel_btn);
-        cup_height_btn = findViewById(R.id.button20);
-        cup_width_btn = findViewById(R.id.button21);
+        complete_btn = findViewById(R.id.complete_btn);
         heightButton = findViewById(R.id.height);
-        mode_text = (Button)findViewById(R.id.flag);
+        result_ = (Button)findViewById(R.id.flag);
 //</editor-fold desc="변수 매칭구간">
         numberOfAnchors = MAX_ANCHORS;
         getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, fragment) -> {
@@ -159,10 +157,11 @@ public class CameraguideActivity extends AppCompatActivity implements
                     return null;
                 });
 //</editor-fold desc="렌더러블 초기 설정">
-        //컵 생성하는 버튼을 누르면, 나머지 버튼은 사라지고 컵 측정 버튼이 생성되도록 만듦.
+        //머그컵 버튼 클릭리스너
         mug_cup_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cupname = "mug";
                 mug_cup_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.VISIBLE);
                 numberOfAnchors = 0;
@@ -171,7 +170,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 heightButton.setVisibility(View.VISIBLE);
                 wine_glass_btn.setVisibility(View.GONE);
                 cocktail_glass_btn.setVisibility(View.GONE);
-                mode_text.setVisibility(View.VISIBLE);
+                result_.setVisibility(View.VISIBLE);
+                complete_btn.setVisibility(View.VISIBLE);
 
                 //2d ui로 설명하기
                     try{Frame frame = arFragment.getArSceneView().getArFrame();
@@ -184,14 +184,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                         addedAnchorNode.setEnabled(true);
                         //결과 넣기
                         TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
-                        String msg = "머그컵 측정 안내 - 세로 후 가로를 측정합니다." +
-                                "\n\n세로 측정 방법 : \n\n" +
-                                "화면에 보이는 컵의 바닥을 눌러 세로 길이의 기준이 되어줄 점을 먼저 설정합니다."+
-                                "\n\n상단의 ~~ 버튼을 눌러 세로점을 생성하고, ~~ 버튼으로 미세 조정하여 길이를 맞춰줍니다."+
-                                "\n\n세로 측정이 종료되면, 가로 측정이 시작됩니다. \n" +
+                        String msg = "머그컵 측정 안내 - 가로 측정 후 세로를 측정합니다." +
                                 "\n\n가로 측정 방법 : \n\n" +
                                 "화면에 보이는 컵의 밑면 지름을 측정하도록 두 점을 설정하면 됩니다." +
-                                "\n\n측정이 완료되면, 완료 버튼을 누르면 됩니다.";
+                                "\n\n측정이 완료되면, 휴지통 버튼을 눌러 노드를 삭제하고 세로 측정을 시작합니다.."+
+                                "\n\n세로 측정 방법 : \n\n" +
+                                "화면에 보이는 컵의 바닥을 눌러 세로 길이의 기준이 되어줄 점을 먼저 설정합니다."+
+                                "\n\n상단의 세로 아이콘 버튼을 눌러 세로점을 생성하고, 버튼을 한번 더 눌러 미세 조정하여 길이를 맞춰줍니다."+
+                                "\n\n세로 측정이 종료되면, 완료 버튼을 누르면 됩니다.\n";
                         text.setText(msg);
                         //닫기 누르면 사라지도록
                         renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
@@ -212,6 +212,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                                 .show();
                         mug_cup_btn.setVisibility(View.VISIBLE);
                         cancel_btn.setVisibility(View.GONE);
+                        result_.setVisibility(View.GONE);
+                        complete_btn.setVisibility(View.GONE);
                         numberOfAnchors = MAX_ANCHORS;
                         create_mode = 0;
                         deleteButton.setVisibility(View.GONE);
@@ -219,18 +221,34 @@ public class CameraguideActivity extends AppCompatActivity implements
                     }
                 }
     });
-
-        //취소 누르면 취소 되게.
+        //완료 버튼 -가이드 시작 버튼- 클릭리스너
+        complete_btn.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if(cup_width<=0&&cup_height<=0){
+                    Toast.makeText(CameraguideActivity.this, "길이 측정 완료 후 눌러주세요.", Toast.LENGTH_SHORT).show();
+                }
+                else if(cup_height<=0){
+                    Toast.makeText(CameraguideActivity.this, "높이 측정이 완료되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //이 함수 아직 안만듬!
+                    //start_guide(cupname, cup_width, cup_height, width_pose, height_pose);
+                }
+            }
+        });
+        //취소 버튼 클릭리스너
         cancel_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //여기서는 모든걸 원점으로 되돌림,,
                 mug_cup_btn.setVisibility(View.VISIBLE);
                 wine_glass_btn.setVisibility(View.VISIBLE);
                 cocktail_glass_btn.setVisibility(View.VISIBLE);
                 cancel_btn.setVisibility(View.GONE);
                 renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
-                mode_text.setText("측정 결과는 이곳에 표시됩니다.");
-                mode_text.setVisibility(View.GONE);
+                result_.setText("측정 결과 표시창.");
+                result_.setVisibility(View.GONE);
                 create_mode = 0;
                 deleteButton.setVisibility(View.GONE);
                 heightButton.setVisibility(View.GONE);
@@ -238,15 +256,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                 cup_width = 0;
                 width_pose = null;
                 height_pose = null;
-
+                cupname = "";
                 while (numberOfAnchors!=0) {
                     deleteButton.performClick();
                 }
                 numberOfAnchors = MAX_ANCHORS;
             }
         });
-
-        //생성된 노드를 삭제하는 버튼 - 가장 최근에 만든 버튼부터 삭제
+        //생성된 노드를 삭제하는 버튼 클릭리스너 - 가장 최근에 만든 버튼부터 삭제
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -260,8 +277,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
             }
         });
-
-        //벽을 평면으로 감지하지 못한 경우에는 강제로 높이를 측정할 노드를 생성시킴
+        //벽을 평면으로 감지하지 못한 경우에는 강제로 높이를 측정할 노드를 생성시킴 = 높이 앵커 생성하는 버튼 클릭리스너
         heightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -276,10 +292,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
             }
         });
-
-
     }
-
+    //노드 삭제하는 함수
     private void removeAnchorNode() {
         //Remove an anchor node - 가장 뒤(최근)생성된 노드
         arFragment.getArSceneView().getScene().removeChild(anchorNodeList.get(numberOfAnchors - 1));
@@ -289,7 +303,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         numberOfAnchors--;
         selectedAnchorNode = null;
     }
-
+    //탭 했을때 노드 생성하고 측정하는걸 연결해주는? 함수
     @Override
     public void onTapPlane(HitResult hitResult, Plane plane, MotionEvent motionEvent) {
         if (numberOfAnchors < MAX_ANCHORS) {
@@ -313,36 +327,51 @@ public class CameraguideActivity extends AppCompatActivity implements
                 resultanchor.setParent(null);
 
                 if(width_pose==null&&height_pose==null){
-                    Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
-                    Calc_distance("h");
-                }
-                else if(width_pose==null&&height_pose[0]!=null){
                     Toast.makeText(this, "Calc distance for width", Toast.LENGTH_SHORT).show();
                     Calc_distance("w");
                 }
+                else if(height_pose==null&&width_pose[0]!=null){
+                    Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
+                    Calc_distance("h");
+                }
                 else {
-                    Toast.makeText(this, "측정이 끝났습니다. ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
                 }
 
 
             }
             else{
                 if(width_pose==null&&height_pose==null){
-                    Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
-                    Calc_distance("h");
-                }
-                else if(width_pose==null&&height_pose[0]!=null){
                     Toast.makeText(this, "Calc distance for width", Toast.LENGTH_SHORT).show();
                     Calc_distance("w");
                 }
+                else if(height_pose==null&&width_pose[0]!=null){
+                    Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
+                    Calc_distance("h");
+                }
                 else {
-                    Toast.makeText(this, "측정이 끝났습니다. ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
                 }
             }
 
         }
     }
-
+    //측정 결과를 저장해주는 함수
+    private void save_result(double result, String mode){
+        switch (mode){
+            case "w":
+                cup_width = result * 100;
+                result_.setText("가로 측정 결과 : "+cup_width);
+                break;
+            case "h":
+                cup_height = result * 100;
+                result_.setText("세로 측정 결과 : "+cup_height);
+                break;
+            default:
+                break;
+        }
+    }
+    //계산하고, 위 함수에 값 넘겨서 멤버변수로 저장해주고, pose도 다 저장해주는 함수
     public void Calc_distance(String s){
         float x = anchorNodeList.get(0).getWorldPosition().x - anchorNodeList.get(1).getWorldPosition().x;
         float y = anchorNodeList.get(0).getWorldPosition().y - anchorNodeList.get(1).getWorldPosition().y;
@@ -397,7 +426,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
         save_result(result, s);
     }
-
+    //높이 앵커 생성 함수
     public void createAnchorNode_height() {
         if (numberOfAnchors < MAX_ANCHORS) {
             //새로운 높이를 표현할 앵커 설치, 기준이 될 앵커의 pose를 가져옴 : 가장 처음에 만든 앵커의 포즈를 가져옴
@@ -425,7 +454,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             selectedAnchorNode = moveRenderable(selectedAnchorNode, newPose);
         }
     }
-
+    //높이 미세조절하도록 앵커 옮겨주는 함수
     private AnchorNode moveRenderable(AnchorNode anchorNodeToMove, Pose newPoseToMoveTo) {
         //지우고 다시 생성해서 리턴해줌
         arFragment.getArSceneView().getScene().removeChild(anchorNodeToMove);
@@ -440,18 +469,5 @@ public class CameraguideActivity extends AppCompatActivity implements
 
         return newanchorNode;
     }
-    private void save_result(double result, String mode){
-        switch (mode){
-            case "w":
-                cup_width = result * 100;
-                mode_text.setText("컵의 가로 측정 결과 : "+cup_width);
-                break;
-            case "h":
-                cup_height = result * 100;
-                mode_text.setText("컵의 세로 측정 결과 : "+cup_height);
-                break;
-            default:
-                break;
-        }
-    }
+
 }
