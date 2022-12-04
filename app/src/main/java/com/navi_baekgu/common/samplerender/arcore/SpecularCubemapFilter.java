@@ -6,6 +6,7 @@ import static java.lang.Math.min;
 import android.media.Image;
 import android.opengl.GLES30;
 import android.util.Log;
+
 import com.google.ar.core.ImageFormat;
 import com.navi_baekgu.common.samplerender.GLError;
 import com.navi_baekgu.common.samplerender.Mesh;
@@ -47,7 +48,7 @@ public class SpecularCubemapFilter implements Closeable {
 
     static {
         COORDS_BUFFER.put(
-                new float[] {
+                new float[]{
                         /*0:*/ -1f, -1f, /*1:*/ +1f, -1f, /*2:*/ -1f, +1f, /*3:*/ +1f, +1f,
                 });
     }
@@ -181,7 +182,7 @@ public class SpecularCubemapFilter implements Closeable {
                             render,
                             Mesh.PrimitiveMode.TRIANGLE_STRIP,
                             /*indexBuffer=*/ null,
-                            new VertexBuffer[] {coordsBuffer});
+                            new VertexBuffer[]{coordsBuffer});
         } catch (Throwable t) {
             close();
             throw t;
@@ -285,7 +286,9 @@ public class SpecularCubemapFilter implements Closeable {
         }
     }
 
-    /** Returns the number of mipmap levels in the filtered cubemap texture. */
+    /**
+     * Returns the number of mipmap levels in the filtered cubemap texture.
+     */
     public int getNumberOfMipmapLevels() {
         return numberOfMipmapLevels;
     }
@@ -421,7 +424,7 @@ public class SpecularCubemapFilter implements Closeable {
                 float nol = 2f * noh2 - 1f;
                 if (nol > 0) {
                     ImportanceSampleCacheEntry entry = new ImportanceSampleCacheEntry();
-                    entry.direction = new float[] {2f * noh * h[0], 2 * noh * h[1], nol};
+                    entry.direction = new float[]{2f * noh * h[0], 2 * noh * h[1], nol};
                     float pdf = distributionGgx(noh, roughness) / 4f;
                     float log4omegaS = log4(1f / (numberOfImportanceSamples * pdf));
                     // K is a LOD bias that allows a bit of overlapping between samples
@@ -490,7 +493,7 @@ public class SpecularCubemapFilter implements Closeable {
         bits = ((bits & 0x33333333L) << 2) | ((bits & 0xCCCCCCCCL) >>> 2);
         bits = ((bits & 0x0F0F0F0FL) << 4) | ((bits & 0xF0F0F0F0L) >>> 4);
         bits = ((bits & 0x00FF00FFL) << 8) | ((bits & 0xFF00FF00L) >>> 8);
-        return new float[] {i * iN, bits * tof};
+        return new float[]{i * iN, bits * tof};
     }
 
     private static float[] hemisphereImportanceSampleDggx(float[] u, float a) {
@@ -500,7 +503,7 @@ public class SpecularCubemapFilter implements Closeable {
         float cosTheta2 = (1f - u[1]) / (1f + (a + 1f) * ((a - 1f) * u[1]));
         float cosTheta = sqrt(cosTheta2);
         float sinTheta = sqrt(1f - cosTheta2);
-        return new float[] {sinTheta * cos(phi), sinTheta * sin(phi), cosTheta};
+        return new float[]{sinTheta * cos(phi), sinTheta * sin(phi), cosTheta};
     }
 
     private static float distributionGgx(float noh, float a) {

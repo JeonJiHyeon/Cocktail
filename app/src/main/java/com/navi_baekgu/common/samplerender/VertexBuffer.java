@@ -1,6 +1,7 @@
 package com.navi_baekgu.common.samplerender;
 
 import android.opengl.GLES30;
+
 import java.io.Closeable;
 import java.nio.FloatBuffer;
 
@@ -11,7 +12,7 @@ import java.nio.FloatBuffer;
  * attribute data; for example, local coordinates, texture coordinates, vertex normals, etc.
  *
  * @see <a
- *     href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glVertexAttribPointer.xhtml">glVertexAttribPointer</a>
+ * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glVertexAttribPointer.xhtml">glVertexAttribPointer</a>
  */
 public class VertexBuffer implements Closeable {
     private final GpuBuffer buffer;

@@ -29,7 +29,7 @@ public class CocktaillistActivity extends AppCompatActivity {
         cocktaillistViewModel.getAdapter().setOnItemClickListener(new CocktailAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                Toast.makeText(v.getContext(), position+1+"번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), position + 1 + "번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(v.getContext(), DetailActivity.class);
                 startActivity(intent);
 
@@ -40,8 +40,6 @@ public class CocktaillistActivity extends AppCompatActivity {
 
         binding.setViewmodel(cocktaillistViewModel);
         binding.setLifecycleOwner(this);
-
-
 
 
     }

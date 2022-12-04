@@ -3,6 +3,7 @@ package com.navi_baekgu.common.helpers;
 import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
+
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -13,7 +14,10 @@ import com.google.android.material.snackbar.Snackbar;
 public final class SnackbarHelper {
     private static final int BACKGROUND_COLOR = 0xbf323232;
     private Snackbar messageSnackbar;
-    private enum DismissBehavior { HIDE, SHOW, FINISH };
+
+    private enum DismissBehavior {HIDE, SHOW, FINISH}
+
+    ;
     private int maxLines = 2;
     private String lastMessage = "";
     private View snackbarView;
@@ -22,7 +26,9 @@ public final class SnackbarHelper {
         return messageSnackbar != null;
     }
 
-    /** Shows a snackbar with a given message. */
+    /**
+     * Shows a snackbar with a given message.
+     */
     public void showMessage(Activity activity, String message) {
         if (!message.isEmpty() && (!isShowing() || !lastMessage.equals(message))) {
             lastMessage = message;
@@ -30,7 +36,9 @@ public final class SnackbarHelper {
         }
     }
 
-    /** Shows a snackbar with a given message, and a dismiss button. */
+    /**
+     * Shows a snackbar with a given message, and a dismiss button.
+     */
     public void showMessageWithDismiss(Activity activity, String message) {
         show(activity, message, DismissBehavior.SHOW);
     }
@@ -73,9 +81,9 @@ public final class SnackbarHelper {
      * <p>To use the root layout ({@link android.R.id.content}), pass in {@code null}.
      *
      * @param snackbarView the view to pass to {@link
-     *     com.google.android.material.snackbar.Snackbar#make(…)} which will be used to find a
-     *     suitable parent, which is a {@link androidx.coordinatorlayout.widget.CoordinatorLayout}, or
-     *     the window decor's content view, whichever comes first.
+     *                     com.google.android.material.snackbar.Snackbar#make(…)} which will be used to find a
+     *                     suitable parent, which is a {@link androidx.coordinatorlayout.widget.CoordinatorLayout}, or
+     *                     the window decor's content view, whichever comes first.
      */
     public void setParentView(View snackbarView) {
         this.snackbarView = snackbarView;
