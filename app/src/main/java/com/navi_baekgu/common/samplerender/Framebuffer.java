@@ -2,9 +2,12 @@ package com.navi_baekgu.common.samplerender;
 
 import android.opengl.GLES30;
 import android.util.Log;
+
 import java.io.Closeable;
 
-/** A framebuffer associated with a texture. */
+/**
+ * A framebuffer associated with a texture.
+ */
 public class Framebuffer implements Closeable {
     private static final String TAG = Framebuffer.class.getSimpleName();
 
@@ -91,7 +94,9 @@ public class Framebuffer implements Closeable {
         depthTexture.close();
     }
 
-    /** Resizes the framebuffer to the given dimensions. */
+    /**
+     * Resizes the framebuffer to the given dimensions.
+     */
     public void resize(int width, int height) {
         if (this.width == width && this.height == height) {
             return;
@@ -130,22 +135,30 @@ public class Framebuffer implements Closeable {
         GLError.maybeThrowGLException("Failed to specify depth texture format", "glTexImage2D");
     }
 
-    /** Returns the color texture associated with this framebuffer. */
+    /**
+     * Returns the color texture associated with this framebuffer.
+     */
     public Texture getColorTexture() {
         return colorTexture;
     }
 
-    /** Returns the depth texture associated with this framebuffer. */
+    /**
+     * Returns the depth texture associated with this framebuffer.
+     */
     public Texture getDepthTexture() {
         return depthTexture;
     }
 
-    /** Returns the width of the framebuffer. */
+    /**
+     * Returns the width of the framebuffer.
+     */
     public int getWidth() {
         return width;
     }
 
-    /** Returns the height of the framebuffer. */
+    /**
+     * Returns the height of the framebuffer.
+     */
     public int getHeight() {
         return height;
     }

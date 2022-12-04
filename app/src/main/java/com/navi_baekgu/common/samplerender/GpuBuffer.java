@@ -2,6 +2,7 @@ package com.navi_baekgu.common.samplerender;
 
 import android.opengl.GLES30;
 import android.util.Log;
+
 import java.nio.Buffer;
 
 /* package-private */

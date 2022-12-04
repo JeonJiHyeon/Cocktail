@@ -1,6 +1,7 @@
 package com.navi_baekgu.common.samplerender.arcore;
 
 import android.opengl.Matrix;
+
 import com.google.ar.core.Camera;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
@@ -26,7 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Renders the detected AR planes. */
+/**
+ * Renders the detected AR planes.
+ */
 public class PlaneRenderer {
     private static final String TAG = PlaneRenderer.class.getSimpleName();
 
@@ -114,7 +117,9 @@ public class PlaneRenderer {
         mesh = new Mesh(render, Mesh.PrimitiveMode.TRIANGLE_STRIP, indexBufferObject, vertexBuffers);
     }
 
-    /** Updates the plane model transform matrix and extents. */
+    /**
+     * Updates the plane model transform matrix and extents.
+     */
     private void updatePlaneParameters(
             float[] planeMatrix, float extentX, float extentZ, FloatBuffer boundary) {
         System.arraycopy(planeMatrix, 0, modelMatrix, 0, 16);
@@ -203,10 +208,10 @@ public class PlaneRenderer {
     /**
      * Draws the collection of tracked planes, with closer planes hiding more distant ones.
      *
-     * @param allPlanes The collection of planes to draw.
-     * @param cameraPose The pose of the camera, as returned by {@link Camera#getPose()}
+     * @param allPlanes        The collection of planes to draw.
+     * @param cameraPose       The pose of the camera, as returned by {@link Camera#getPose()}
      * @param cameraProjection The projection matrix, as returned by {@link
-     *     Camera#getProjectionMatrix(float[], int, float, float)}
+     *                         Camera#getProjectionMatrix(float[], int, float, float)}
      */
     public void drawPlanes(
             SampleRender render, Collection<Plane> allPlanes, Pose cameraPose, float[] cameraProjection) {

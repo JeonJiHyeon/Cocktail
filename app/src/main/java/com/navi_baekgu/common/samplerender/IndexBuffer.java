@@ -1,6 +1,7 @@
 package com.navi_baekgu.common.samplerender;
 
 import android.opengl.GLES30;
+
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
@@ -11,7 +12,7 @@ import java.nio.IntBuffer;
  * ordering of vertices when drawing each primitive.
  *
  * @see <a
- *     href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
+ * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glDrawElements.xhtml">glDrawElements</a>
  */
 public class IndexBuffer implements Closeable {
     private final GpuBuffer buffer;

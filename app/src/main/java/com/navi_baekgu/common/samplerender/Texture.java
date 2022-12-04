@@ -5,11 +5,14 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES30;
 import android.util.Log;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-/** A GPU-side texture. */
+/**
+ * A GPU-side texture.
+ */
 public class Texture implements Closeable {
     private static final String TAG = Texture.class.getSimpleName();
 
@@ -20,7 +23,7 @@ public class Texture implements Closeable {
      * Describes the way the texture's edges are rendered.
      *
      * @see <a
-     *     href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexParameter.xhtml">GL_TEXTURE_WRAP_S</a>.
+     * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexParameter.xhtml">GL_TEXTURE_WRAP_S</a>.
      */
     public enum WrapMode {
         CLAMP_TO_EDGE(GLES30.GL_CLAMP_TO_EDGE),
@@ -39,7 +42,7 @@ public class Texture implements Closeable {
      * Describes the target this texture is bound to.
      *
      * @see <a
-     *     href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glBindTexture.xhtml">glBindTexture</a>.
+     * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glBindTexture.xhtml">glBindTexture</a>.
      */
     public enum Target {
         TEXTURE_2D(GLES30.GL_TEXTURE_2D),
@@ -57,7 +60,7 @@ public class Texture implements Closeable {
      * Describes the color format of the texture.
      *
      * @see <a
-     *     href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml">glTexImage2d</a>.
+     * href="https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml">glTexImage2d</a>.
      */
     public enum ColorFormat {
         LINEAR(GLES30.GL_RGBA8),
@@ -107,7 +110,9 @@ public class Texture implements Closeable {
         }
     }
 
-    /** Create a texture from the given asset file name. */
+    /**
+     * Create a texture from the given asset file name.
+     */
     public static Texture createFromAsset(
             SampleRender render, String assetFileName, WrapMode wrapMode, ColorFormat colorFormat)
             throws IOException {
@@ -162,7 +167,9 @@ public class Texture implements Closeable {
         }
     }
 
-    /** Retrieve the native texture ID. */
+    /**
+     * Retrieve the native texture ID.
+     */
     public int getTextureId() {
         return textureId[0];
     }
