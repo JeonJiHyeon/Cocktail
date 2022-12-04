@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <data>
+<!--    <data>-->
 
-        <variable
-            name="viewmodel"
-            type="com.navi_baekgu.ui.recipe.CocktaillistViewModel" />
+<!--        <variable-->
+<!--            name="viewmodel"-->
+<!--            type="com.navi_baekgu.ui.recipe.CocktaillistViewModel" />-->
 
-        <variable
-            name="pos"
-            type="Integer" />
-    </data>
+<!--        <variable-->
+<!--            name="pos"-->
+<!--            type="Integer" />-->
+<!--    </data>-->
 
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -47,18 +47,31 @@
                     android:layout_margin="5dp"
                     android:orientation="vertical">
 
+<!--                    <TextView-->
+<!--                        android:id="@+id/textView11"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@{viewmodel.getName(pos)}"-->
+<!--                        android:textSize="32sp" />-->
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/textView12"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@{viewmodel.getBase(pos)}"-->
+<!--                        android:textSize="20sp" />-->
                     <TextView
                         android:id="@+id/textView11"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@{viewmodel.getname(pos)}"
+                        android:text="null"
                         android:textSize="32sp" />
 
                     <TextView
                         android:id="@+id/textView12"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@{viewmodel.gettags(pos)}"
+                        android:text="null"
                         android:textSize="20sp" />
                 </LinearLayout>
 

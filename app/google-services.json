@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "239691470845",
+    "project_id": "cocktail-37e04",
+    "storage_bucket": "cocktail-37e04.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239691470845:android:58078835a014f8bbc86b94",
+        "android_client_info": {
+          "package_name": "com.navi_baekgu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "239691470845-9v87bf92r8ea3r2g123q7lmp27qnn2jh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.navi_baekgu",
+            "certificate_hash": "a141352ae663ef83adc2b145511d826f43e9d9e0"
+          }
+        },
+        {
+          "client_id": "239691470845-3egboj5mennk6shpvguv3jj8884kkcfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB53ZqlMuckk9YIrF4DW42bmIW34e-_lPE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "239691470845-3egboj5mennk6shpvguv3jj8884kkcfi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
