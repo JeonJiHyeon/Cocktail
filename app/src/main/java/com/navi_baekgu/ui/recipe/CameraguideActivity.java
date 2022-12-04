@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,25 +23,34 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
+import com.google.ar.sceneform.rendering.Material;
 import com.google.ar.sceneform.rendering.MaterialFactory;
+import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
+import com.google.ar.sceneform.rendering.RenderableDefinition;
 import com.google.ar.sceneform.rendering.ShapeFactory;
+import com.google.ar.sceneform.rendering.Texture;
+import com.google.ar.sceneform.rendering.Vertex;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.BaseArFragment;
 import com.navi_baekgu.R;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.google.ar.sceneform.ux.ArFragment;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-
+//컨트롤 쉬프트 빼기 : 모든 코드 접기
 public class CameraguideActivity extends AppCompatActivity implements
         BaseArFragment.OnTapArPlaneListener {
     //<editor-fold desc="변수 생성구간">
@@ -118,13 +128,11 @@ public class CameraguideActivity extends AppCompatActivity implements
                 .thenAccept(material -> {
                     sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
                     sphere.setShadowCaster(false);
-                    sphere.setShadowReceiver(false);
                 });
         MaterialFactory.makeOpaqueWithColor(this, color2)
                 .thenAccept(material -> {
                     guide_sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
                     sphere.setShadowCaster(false);
-                    sphere.setShadowReceiver(false);
                 });
         //2d ui를 띄운다. 카메라 유아이라는 xml을 따로 만들어서 뷰 렌더러블 클래스에 적용시킨것. 적용시키는 방법은 위에 있던것들하고 동일
         WeakReference<CameraguideActivity> weakActivity = new WeakReference<>(this);
@@ -502,8 +510,6 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
         switch (cupname){
             case "mug":
-                //그래픽을 생성하는 부분 height pose는 따로 만질 필요가 없지만, 가로는 두 점을 회전시키면서 원을 만들어야 함.
-                //두 점을 그냥 동시에 회전시켜서 10개의 포지션을 만든 개별 앵커, 그걸 서로 이어서 원을 만들고, 내부는 반투명 렌더러블로 채워준다.
                 //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
                 //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성 => 그냥 앵커 고개를 회전시킴 안됌
                 //원의 방정식을 이용 가로 배열 마지막 원소가 미드 포지션임. 중심 (a, b, c)라고 하면 y값은 무시하고 x와 z로만 방정식을 만듦
@@ -534,7 +540,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 anchors[7] = session.createAnchor(pose_list[7]);
                 anchornodes[7] = new AnchorNode(anchors[7]);
                 place(anchornodes[7], "r");
-
+                float height = 0.03f;
+                make_cylinder(radius, height, midPosition,width_pose[0]);
                 break;
             case "wine":
                 break;
@@ -572,17 +579,54 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     //가이드 밑면 원 그려줄 앵커들 화면에 배치해주는 함수
     private void place(AnchorNode anchorNode, String s){
+        Color color1 = new Color(255, 0, 0, 0.6f);
+        Color color2 = new Color(255, 102, 102, 0.6f);
+        MaterialFactory.makeTransparentWithColor(this, color1)
+                .thenAccept(material -> {
+                    Renderable sphere;
+                    sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
+                    sphere.setShadowCaster(false);
+                });
+        MaterialFactory.makeTransparentWithColor(this, color2)
+                .thenAccept(material -> {
+                    Renderable guide_sphere;
+                    guide_sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
+                    guide_sphere.setShadowCaster(false);
+                });
+
+
         anchorNode.setParent(arFragment.getArSceneView().getScene());
         anchorNode.setRenderable(guide_sphere);
-        anchorNode.setLocalScale(new Vector3(0.3f, 0.3f, 0.3f));
+        anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
         if (Objects.equals(s, "r")){
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             anchorNode.setRenderable(sphere);
-            anchorNode.setLocalScale(new Vector3(0.3f, 0.3f, 0.3f));
+            anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
         }
     }
     //부피 구해주는 함수
     private double calculateVolume(double radius, double height) {
         return Math.pow(radius,2) * Math.PI * height;
     }
+    //원 그려주는 함수.
+    private void make_cylinder(double radius,float height, Pose mid, Pose width){
+        Color color2 = new Color(255, 140, 50, 0.35f);
+        MaterialFactory.makeTransparentWithColor(this, color2)
+                .thenAccept(material -> {
+                            Renderable Cylinder;
+                            //컵의 두께와 노드를 생각한다면 radius를 좀 더 빼줘도 됨.
+                            //랜더러는 앵커(노드)를 중심으로해서 위로 반, 아래로 반 생성된다는 점 잊지말기
+                            Cylinder = ShapeFactory.makeCylinder((float) radius-0.00025f, height, new Vector3(0.0f,height/2,0.0f), material);
+                            Cylinder.setShadowCaster(false);
+                            float[] position = {mid.tx(), width.ty(), mid.tz()};
+                            float[] q = {0.0f, 0.0f, 0.0f, 0.0f};
+                            Pose midpose = new Pose(position,q);
+                            Session session = arFragment.getArSceneView().getSession();
+                            Anchor anchor = session.createAnchor(midpose);
+                            AnchorNode anchorNode = new AnchorNode(anchor);
+                            anchorNode.setParent(arFragment.getArSceneView().getScene());
+                            anchorNode.setRenderable(Cylinder);
+                        });
+    }
+
 }
