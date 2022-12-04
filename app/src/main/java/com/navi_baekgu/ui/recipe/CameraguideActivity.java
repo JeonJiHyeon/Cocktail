@@ -3,35 +3,29 @@ package com.navi_baekgu.ui.recipe;
 import static com.google.ar.sceneform.rendering.HeadlessEngineWrapper.TAG;
 import java.lang.Math;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.ar.core.Anchor;
-import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.MaterialFactory;
-import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
-import com.google.ar.sceneform.rendering.RenderableInstance;
 import com.google.ar.sceneform.rendering.ShapeFactory;
-import com.google.ar.sceneform.rendering.Texture;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.BaseArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
 import com.navi_baekgu.R;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import com.google.ar.sceneform.ux.ArFragment;
@@ -44,6 +38,8 @@ public class CameraguideActivity extends AppCompatActivity  implements
     private List<AnchorNode> anchorNodeList = new ArrayList<>();
     //지금 몇개의 앵커가 있는지 저장할 변수
     private Integer numberOfAnchors = 0;
+
+    private ViewRenderable viewRenderable;
 
 
     //지금 선택한 노드를 가르킬것 - height 측정시 사용됨
@@ -110,6 +106,27 @@ public class CameraguideActivity extends AppCompatActivity  implements
 
         //Material 색상 지정하고, 그걸로 shapeFactory를 통해 랜더러블 구를 생성함 radius 0.01f
         //모델과 텍스처를 초기화시키고 그것을 계속 재사용하는거랑 같음!!
+
+        ViewRenderable.builder()
+                .setView(this, R.layout.lengh_info)
+                .build()
+                .thenAccept (viewRenderable -> {
+                    addtoScene(viewRenderable, anchor);
+
+            it.isShadowReceiver = false
+            it.view.findViewById<ImageButton>(R.id.info_button).setOnClickListener {
+                // TODO: do smth here
+            }
+            addControlsToScene(fragment, anchor, it)
+        }
+            .exceptionally {
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage(it.message).setTitle("Error")
+            val dialog = builder.create()
+            dialog.show()
+            return@exceptionally null
+        }
+
         MaterialFactory.makeOpaqueWithColor(this, color)
                 .thenAccept(material -> {
                     sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
