@@ -43,6 +43,7 @@ import com.navi_baekgu.R;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.ar.sceneform.ux.ArFragment;
 
@@ -414,11 +415,12 @@ public class CameraguideActivity extends AppCompatActivity implements
                 height_pose = new Pose[]{pose1, pose2};
                 break;
             case "w":
+                //가로 모드는 중간값을 넘겨준다. 세로는 그럴 필요 없는듯?
                 float[] pos3 = {anchorNodeList.get(0).getWorldPosition().x,anchorNodeList.get(0).getWorldPosition().y,anchorNodeList.get(0).getWorldPosition().z};
                 float[] pos4 = {anchorNodeList.get(1).getWorldPosition().x,anchorNodeList.get(1).getWorldPosition().y,anchorNodeList.get(1).getWorldPosition().z};
                 Pose pose3 = new Pose(pos3,mid_q);
                 Pose pose4 = new Pose(pos4,mid_q);
-                width_pose = new Pose[]{pose3, pose4};
+                width_pose = new Pose[]{pose3,pose4,midPosition};
                 break;
         }
 
@@ -492,28 +494,43 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
         switch (cupname){
             case "mug":
-                //부피를 구하는 부분
+                //2-6 3-5
+                //부피를 구하는 부분 -아직안함
+
+
                 //그래픽을 생성하는 부분 height pose는 따로 만질 필요가 없지만, 가로는 두 점을 회전시키면서 원을 만들어야 함.
                 //두 점을 그냥 동시에 회전시켜서 10개의 포지션을 만든 개별 앵커, 그걸 서로 이어서 원을 만들고, 내부는 반투명 렌더러블로 채워준다.
                 //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
+                //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성 => 그냥 앵커 고개를 회전시킴 안됌
+                //원의 방정식을 이용 가로 배열 마지막 원소가 미드 포지션임. 중심 (a, b, c)라고 하면 y값은 무시하고 x와 z로만 방정식을 만듦
+                //(x-a)^2 + (z-c)^2 = r^2 으로 이 위에 있는 점들을 구한다.
+                //인자로 넘어온 radius 값은 cm단위고 오픈gl은 m단위체계이므로 100을 나눠주도록 한다.
+                double radius = (cup_width / 2)/100;
+                Pose midPosition = width_pose[2];
+                float[] x_positions = new float[5];
+                x_positions[0] = width_pose[0].tx();
+                x_positions[4] = width_pose[1].tx();
+                float[] z_positions = calc_position(radius, midPosition, x_positions);
+
+                Pose[] pose_list = make_pose(x_positions,width_pose[0],z_positions);
+                pose_list[0] = width_pose[0];
+                pose_list[7] = width_pose[1];
+
                 Session session = arFragment.getArSceneView().getSession();
-                float[] quat = {0.0f,0.0f,0.f,0.0f};
-                //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성?
-                Pose newpose = width_pose[0].compose(Pose.makeRotation(0.0f, 1.0f, 0.0f,0.0f ));
+                Anchor[] anchors = new Anchor[8];
+                AnchorNode[] anchornodes = new AnchorNode[8];
+                for (int i = 1;i<7;i++){
+                    anchors[i] = session.createAnchor(pose_list[i]);
+                    anchornodes[i] = new AnchorNode(anchors[i]);
+                    place(anchornodes[i], "");
+                }
+                anchors[0] = session.createAnchor(pose_list[0]);
+                anchornodes[0] = new AnchorNode(anchors[0]);
+                place(anchornodes[0], "r");
+                anchors[7] = session.createAnchor(pose_list[7]);
+                anchornodes[7] = new AnchorNode(anchors[7]);
+                place(anchornodes[7], "r");
 
-                Anchor anchor = session.createAnchor(newpose);
-                Anchor anchor1 = session.createAnchor(width_pose[0]);
-
-                AnchorNode anchorNode = new AnchorNode(anchor);
-                AnchorNode anchorNode1 = new AnchorNode(anchor1);
-
-                anchorNode.setParent(arFragment.getArSceneView().getScene());
-                anchorNode.setRenderable(guide_sphere);
-                anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
-
-                anchorNode1.setParent(arFragment.getArSceneView().getScene());
-                anchorNode1.setRenderable(sphere);
-                anchorNode1.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
                 break;
             case "wine":
                 break;
@@ -521,6 +538,42 @@ public class CameraguideActivity extends AppCompatActivity implements
                 break;
             default:
                 break;
+        }
+    }
+    //원호 그리는 포지션들 계산해서 z리스트 리턴
+    private float[] calc_position(double radius, Pose midposition, float[] x){
+        float[] z_list = new float[8]; // 0과 7번째 인덱스는 비워둘거임(걍 헷갈려서 크기 맞춤,,)
+        float cm = ((x[4] - x[0]) / 4);
+        for (int i = 1; i<4; i++){
+            x[i] = x[0] + i*cm;
+            z_list[(2*i)-1] = (float)Math.sqrt(Math.pow(radius,2) - Math.pow((x[i] - midposition.tx()),2))+midposition.tz();
+            z_list[2*i] = (float)-Math.sqrt(Math.pow(radius,2) - Math.pow((x[i] - midposition.tx()),2))+midposition.tz();
+        }
+        return z_list;
+    }
+
+    private Pose[] make_pose(float[] x, Pose w_pos, float[] z){
+        Pose[] p_list = new Pose[8];
+        float[][] position = new float[6][];
+        float[] quat = {0.0f,0.0f,0.f,0.0f};
+        int i = 1;
+        for (int j = 0; j < 6; j++) {
+            position[j] = new float[]{x[i], w_pos.ty(), z[j+1]};
+            if((j+1)%2==0) i++;
+        }
+        for (int j = 1; j<7; j++){
+            p_list[j] = new Pose(position[j-1], quat);
+        }
+        return p_list;
+    }
+    private void place(AnchorNode anchorNode, String s){
+        anchorNode.setParent(arFragment.getArSceneView().getScene());
+        anchorNode.setRenderable(guide_sphere);
+        anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
+        if (Objects.equals(s, "r")){
+            anchorNode.setParent(arFragment.getArSceneView().getScene());
+            anchorNode.setRenderable(sphere);
+            anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
         }
     }
 }
