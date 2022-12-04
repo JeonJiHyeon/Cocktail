@@ -4,8 +4,6 @@ import static com.google.ar.sceneform.rendering.HeadlessEngineWrapper.TAG;
 
 import java.lang.Math;
 
-import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,7 +12,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -25,19 +22,13 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
-import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.MaterialFactory;
-import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.Renderable;
-import com.google.ar.sceneform.rendering.RenderableInstance;
 import com.google.ar.sceneform.rendering.ShapeFactory;
-import com.google.ar.sceneform.rendering.Texture;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.BaseArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
-import com.navi_baekgu.MainActivity;
 import com.navi_baekgu.R;
 
 import java.lang.ref.WeakReference;
@@ -176,7 +167,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = 0;
                 create_mode = 1;
                 deleteButton.setVisibility(View.VISIBLE);
-                heightButton.setVisibility(View.VISIBLE);
                 wine_glass_btn.setVisibility(View.GONE);
                 cocktail_glass_btn.setVisibility(View.GONE);
                 result_.setVisibility(View.VISIBLE);
@@ -196,10 +186,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                     String msg = "머그컵 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
                             "\n\n너비 측정 방법 : \n\n" +
                             "화면에 보이는 컵의 밑면 지름을 측정하도록 두 점을 설정해주세요." +
-                            "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다."+
-                            "\n\n높이 측정 방법 : \n\n" +
-                            "상단의 세로 아이콘 버튼을 눌러 두 점 사이의 간격을 조정해 컵의 높이를 설정해주세요."+
-                            "\n\n높이 측정이 종료되면, 완료 버튼을 눌러주세요.\n";
+                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
                     text.setText(msg);
                     //닫기 누르면 사라지도록
                     renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
@@ -241,6 +229,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
                 else {
                     //모든 ui 없애고 시작
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
+                    renderable_ui_result.getView().findViewById(R.id.close_btn).performClick();
                     cup_volume = calculateVolume(cup_width/2, cup_height);
                     deleteButton.setVisibility(View.GONE);
                     heightButton.setVisibility(View.GONE);
@@ -268,6 +258,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 cocktail_glass_btn.setVisibility(View.VISIBLE);
                 cancel_btn.setVisibility(View.GONE);
                 renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
+                renderable_ui_result.getView().findViewById(R.id.close_btn).performClick();
                 result_.setText("측정 결과 표시창.");
                 result_.setVisibility(View.GONE);
                 create_mode = 0;
@@ -427,9 +418,35 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
                 resultanchor.setEnabled(false);
                 if (s.equals("w")) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
                     removeAnchorNode(); // 노드 하나 삭제
                     createAnchorNode_height();
-                    Toast.makeText(getBaseContext(), "상단의 세로 아이콘 버튼을 눌러 컵의 높이를 설정해주세요. 설정이 끝나면 화면을 한 번 터치하세요.", Toast.LENGTH_LONG).show();
+                    heightButton.setVisibility(View.VISIBLE);
+                    //위에서 닫고 다시 만든것 (세로 측정 안내 텍스트용으로)
+                    Frame frame = arFragment.getArSceneView().getArFrame();
+                    Anchor anchor = session.createAnchor(
+                            frame.getCamera().getPose()
+                                    .compose(Pose.makeTranslation(0, 0, -1f)) //This will place the anchor 1M in front of the camera
+                                    .extractTranslation());
+                    AnchorNode addedAnchorNode = new AnchorNode(anchor);
+                    addedAnchorNode.setEnabled(true);
+                    TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+                    String msg = "머그컵 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
+                            "\n\n높이 측정 방법 : \n\n" +
+                            "상단의 세로 아이콘 버튼을 눌러 두 점 사이의 간격을 조정해 컵의 높이를 설정해주세요."+
+                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "\n\n높이 측정이 종료되면, 완료 버튼을 눌러주세요.\n";
+                    text.setText(msg);
+                    //닫기 누르면 사라지도록
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            addedAnchorNode.setEnabled(false);
+                        }
+                    });
+                    addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+                    addedAnchorNode.setRenderable(renderable_ui_info);
+                    addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
                 }
             }
         });
@@ -485,10 +502,6 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
         switch (cupname){
             case "mug":
-                //2-6 3-5
-                //부피를 구하는 부분 -아직안함
-
-
                 //그래픽을 생성하는 부분 height pose는 따로 만질 필요가 없지만, 가로는 두 점을 회전시키면서 원을 만들어야 함.
                 //두 점을 그냥 동시에 회전시켜서 10개의 포지션을 만든 개별 앵커, 그걸 서로 이어서 원을 만들고, 내부는 반투명 렌더러블로 채워준다.
                 //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
@@ -531,7 +544,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 break;
         }
     }
-    //원호 그리는 포지션들 계산해서 z리스트 리턴
+    //가이드 밑면 원호 그리는 포지션들 계산해서 z리스트 리턴
     private float[] calc_position(double radius, Pose midposition, float[] x){
         float[] z_list = new float[8]; // 0과 7번째 인덱스는 비워둘거임(걍 헷갈려서 크기 맞춤,,)
         float cm = ((x[4] - x[0]) / 4);
@@ -542,7 +555,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         }
         return z_list;
     }
-
+    //가이드 밑면 원 그려줄 앵커들 포즈 생성하는 함수
     private Pose[] make_pose(float[] x, Pose w_pos, float[] z){
         Pose[] p_list = new Pose[8];
         float[][] position = new float[6][];
@@ -557,16 +570,18 @@ public class CameraguideActivity extends AppCompatActivity implements
         }
         return p_list;
     }
+    //가이드 밑면 원 그려줄 앵커들 화면에 배치해주는 함수
     private void place(AnchorNode anchorNode, String s){
         anchorNode.setParent(arFragment.getArSceneView().getScene());
         anchorNode.setRenderable(guide_sphere);
-        anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
+        anchorNode.setLocalScale(new Vector3(0.3f, 0.3f, 0.3f));
         if (Objects.equals(s, "r")){
             anchorNode.setParent(arFragment.getArSceneView().getScene());
             anchorNode.setRenderable(sphere);
-            anchorNode.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
+            anchorNode.setLocalScale(new Vector3(0.3f, 0.3f, 0.3f));
         }
     }
+    //부피 구해주는 함수
     private double calculateVolume(double radius, double height) {
         return Math.pow(radius,2) * Math.PI * height;
     }
