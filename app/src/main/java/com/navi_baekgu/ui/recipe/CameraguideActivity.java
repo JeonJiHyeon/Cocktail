@@ -62,6 +62,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     //길이정보 저장해줄 변수
     private double cup_height;
     private double cup_width;
+    private double cup_volume;
     private Pose width_pose[];
     private Pose height_pose[];
     //지금 선택한 노드를 가르킬것 - height 측정시 사용됨
@@ -231,6 +232,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     Toast.makeText(CameraguideActivity.this, "높이 측정이 완료되지 않았습니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    cup_volume = calculateVolume(cup_width/2, cup_height);
                     //이 함수 아직 안만듬!
                     //start_guide(cupname, cup_width, cup_height, width_pose, height_pose);
                 }
@@ -456,6 +458,10 @@ public class CameraguideActivity extends AppCompatActivity implements
         anchorNodeList.add(newanchorNode);
 
         return newanchorNode;
+    }
+
+    private double calculateVolume(double radius, double height) {
+        return Math.pow(radius,2) * Math.PI * height;
     }
 
 }
