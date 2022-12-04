@@ -3,7 +3,9 @@ package com.navi_baekgu.common.helpers;
 import android.app.Activity;
 import android.view.View;
 
-/** Helper to set up the Android full screen mode. */
+/**
+ * Helper to set up the Android full screen mode.
+ */
 public final class FullScreenHelper {
     /**
      * Sets the Android fullscreen flags. Expected to be called from {@link
@@ -11,7 +13,7 @@ public final class FullScreenHelper {
      *
      * @param activity the Activity on which the full screen mode will be set.
      * @param hasFocus the hasFocus flag passed from the {@link Activity#onWindowFocusChanged(boolean
-     *     hasFocus)} callback.
+     *                 hasFocus)} callback.
      */
     public static void setFullScreenOnWindowFocusChanged(Activity activity, boolean hasFocus) {
         if (hasFocus) {
