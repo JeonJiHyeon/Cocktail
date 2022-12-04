@@ -16,18 +16,17 @@
         android:orientation="vertical">
 
 
-<!--        <androidx.recyclerview.widget.RecyclerView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            bind:verAdapter="@{viewmodel.getAdapter()}">-->
-
-<!--        </androidx.recyclerview.widget.RecyclerView>-->
-
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/cocktail_lv"
-            tools:listitem="@layout/layout_cardview"/>
+            android:id="@+id/cocktail_lv">
+        </androidx.recyclerview.widget.RecyclerView>
+
+<!--        <ListView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            -->
+<!--            tools:listitem="@layout/layout_cardview"/>-->
     </LinearLayout>
 
 </layout>

@@ -1,51 +1,76 @@
 package com.navi_baekgu.ui.recycler;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.navi_baekgu.R;
 import com.navi_baekgu.databinding.LayoutCardviewBinding;
+import com.navi_baekgu.ui.recipe.CocktaillistActivity;
+import com.navi_baekgu.ui.recipe.DetailActivity;
 //import com.navi_baekgu.ui.recipe.CocktaillistViewModel;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
 
-//public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHolder> {
-//    private CocktaillistViewModel viewModel;
-public class CocktailAdapter extends BaseAdapter {
-    private static final String TAG = "CocktailAdapter";
 
-//    public CocktailAdapter(CocktaillistViewModel viewModel) {
-//        this.viewModel = viewModel;
-//    }
+public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHolder> {
+    ArrayList<ArrayList<String>> mdatas;
 
-    private ArrayList<Cocktail> mCocktails;
-    private Context mContext;
+    public CocktailAdapter(ArrayList<ArrayList<String>> datas) {
+        this.mdatas = datas;
+    }
 
-    private TextView cocktailName;
-    private TextView cocktailBase;
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        TextView cocktailName, cocktailBase;
+        ViewHolder(View itemView){
+            super(itemView);
+            cocktailName = itemView.findViewById(R.id.cardname);
+            cocktailBase = itemView.findViewById(R.id.cardbase);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position_info = getAdapterPosition();
+                    if(position_info != RecyclerView.NO_POSITION){
+                        Toast.makeText(v.getContext(), position_info + 1 + "번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(v.getContext(), DetailActivity.class);
+                        v.getContext().startActivity(intent);
 
-    public CocktailAdapter(Context mContext, ArrayList<Cocktail> mCocktails){
-        this.mContext = mContext;
-        this.mCocktails = mCocktails;
+                    }
+                }
+            });
+        }
+    }
+
+    @NonNull
+    @Override
+    //	viewType 형태의 아이템 뷰를 위한 뷰홀더 객체 생성.
+    public CocktailAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context context = parent.getContext() ;
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) ;
+
+        View view = inflater.inflate(R.layout.layout_cardview, parent, false) ;
+        CocktailAdapter.ViewHolder viewHolder = new CocktailAdapter.ViewHolder(view) ;
+
+        return viewHolder;
     }
 
     @Override
-    public int getCount() {
-        return 0;
-    }
-
-    @Override
-    public Cocktail getItem(int i) {
-        return mCocktails.get(i);
+    //position에 해당하는 데이터를 뷰홀더의 아이템뷰에 표시.
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.cocktailName.setText(mdatas.get(position).get(1));
+        holder.cocktailBase.setText(mdatas.get(position).get(2));
     }
 
     @Override
@@ -54,73 +79,9 @@ public class CocktailAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        view = LayoutInflater.from(mContext).inflate(R.layout.layout_cardview, null);
-        Log.d(TAG, "hi");
-        cocktailName = view.findViewById(R.id.textView11);
-        Log.d(TAG, mCocktails.get(i).getName());
-        cocktailName.setText(mCocktails.get(i).getName());
-        Log.d(TAG, mCocktails.get(i).getBase());
-        cocktailBase = view.findViewById(R.id.textView12);
-        cocktailBase.setText(mCocktails.get(i).getBase());
-        return view;
+    //	전체 아이템 갯수 리턴.
+    public int getItemCount() {
+        return mdatas.size() ;
     }
-
-//    @NonNull
-//    @Override
-//    public CocktailAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        LayoutCardviewBinding binding = LayoutCardviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-//        return new ViewHolder(binding);
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(@NonNull CocktailAdapter.ViewHolder holder, int position) {
-//        holder.onBind(viewModel, position);
-//    }
-//
-//    @Override
-//    public int getItemCount() {
-//        return viewModel.getCocktails() == null ? 0 : viewModel.getCocktails().size();
-//    }
-//
-//    public class ViewHolder extends RecyclerView.ViewHolder {
-//        private LayoutCardviewBinding binding;
-//
-//        public ViewHolder(LayoutCardviewBinding binding) {
-//            super(binding.getRoot());
-//            this.binding = binding;
-//
-//            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    int pos = getAdapterPosition();
-//                    if (pos != RecyclerView.NO_POSITION) {
-//                        if (mListener != null) {
-//                            mListener.onItemClick(view, pos);
-//                        }
-//
-//                    }
-//                }
-//            });
-//
-//        }
-//
-//        public void onBind(CocktaillistViewModel viewModel, int pos) {
-//            binding.setViewmodel(viewModel);
-//            binding.setPos(pos);
-//            binding.executePendingBindings();
-//        }
-//    }
-//
-//    private OnItemClickListener mListener = null;
-//
-//    public interface OnItemClickListener {
-//        void onItemClick(View v, int position);
-//    }
-//
-//    public void setOnItemClickListener(OnItemClickListener listener) {
-//        this.mListener = listener;
-//    }
-//
 
 }

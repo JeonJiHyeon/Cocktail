@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,10 +29,8 @@ import java.util.List;
 
 public class CocktaillistActivity extends AppCompatActivity {
     private static final String TAG = "CocktaillistActivity";
-//    private ActivityCocktaillistBinding binding;
-//    private CocktaillistViewModel cocktaillistViewModel;
-    private ListView cocktaillistView;
-
+    private RecyclerView Rv;
+    private ArrayList<String> list;
     private CocktailAdapter adapter;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -38,31 +38,8 @@ public class CocktaillistActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cocktaillist);
-
-        cocktaillistView = findViewById(R.id.cocktail_lv);
-
+        Rv = findViewById(R.id.cocktail_lv);
         getCocktailList();
-//        binding = ActivityCocktaillistBinding.inflate(getLayoutInflater());
-//        setContentView(binding.getRoot());
-//        cocktaillistViewModel =
-//                new ViewModelProvider(this).get(CocktaillistViewModel.class);
-//        cocktaillistViewModel.onCreate();
-//
-//        cocktaillistViewModel.getAdapter().setOnItemClickListener(new CocktailAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(View v, int position) {
-//                Toast.makeText(v.getContext(), position + 1 + "번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent(v.getContext(), DetailActivity.class);
-//                startActivity(intent);
-//
-//                finish();
-//
-//            }
-//        });
-//
-//        binding.setViewmodel(cocktaillistViewModel);
-//        binding.setLifecycleOwner(this);
-
 
     }
 
@@ -73,42 +50,42 @@ public class CocktaillistActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            ArrayList<Cocktail> cocktails = new ArrayList<>();
-                            ArrayList<String>[] recipe = new ArrayList[3];
+                            ArrayList<ArrayList<String>> datas = new ArrayList<ArrayList<String>>();
+                            ArrayList<String> arr = new ArrayList<>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, "바깥 포문"+document.getId() + " => " + document.getData());
+                                arr.add(document.getId());
+                                arr.add(document.getString("name"));
+                                arr.add(document.getString("base"));
                                 db.collection("cocktails").document(document.getId()).collection("recipe")
                                         .get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                 if (task.isSuccessful()) {
-                                                    int i = 0;
+
                                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        recipe[i] = new ArrayList<>();
-                                                        recipe[i].add(document.get("order").toString());
-                                                        recipe[i].add(document.getString("ingredient"));
-                                                        recipe[i].add(document.get("quantity").toString());
-                                                        recipe[i].add(document.getString("unit"));
-                                                        recipe[i].add(document.getString("recipe_text"));
-                                                        i++;
-                                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                                        arr.add(document.getId());
+                                                        arr.add(document.get("order").toString());
+                                                        arr.add(document.getString("ingredient"));
+                                                        arr.add(document.get("quantity").toString());
+                                                        arr.add(document.getString("unit"));
+                                                        arr.add(document.getString("recipe_text"));
+                                                        datas.add(arr);
+                                                        Log.d(TAG, "안쪽 포문"+document.getId() + " => " + document.getData());
                                                     }
-                                                    adapter = new CocktailAdapter(CocktaillistActivity.this, cocktails);
-                                                    cocktaillistView.setAdapter(adapter);
-                                                    cocktaillistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                        @Override
-                                                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                                            Toast.makeText(view.getContext(), i+1+"번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    });
+                                                    // 리사이클러뷰에 LinearLayoutManager 객체 지정.
+                                                    Rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
+
+                                                    // 리사이클러뷰에 SimpleTextAdapter 객체 지정. 이부분에 따라 추가됨 지금은 2개 추
+                                                    CocktailAdapter adapter = new CocktailAdapter(datas);
+                                                    Rv.setAdapter(adapter);
                                                 } else {
                                                     Log.w(TAG, "Error getting documents.", task.getException());
                                                 }
                                             }
                                         });
-                                Cocktail cocktail = new Cocktail(document.getString("id"), document.getString("name"), document.getString("base"), recipe);
-                                cocktails.add(cocktail);
-                                Log.d(TAG, document.getId() + " => " + document.getData());
+
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
