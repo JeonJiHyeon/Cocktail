@@ -225,6 +225,124 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
             }
         });
+        wine_glass_btn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cupname = "wine";
+                mug_cup_btn.setVisibility(View.GONE);
+                cancel_btn.setVisibility(View.VISIBLE);
+                numberOfAnchors = 0;
+                create_mode = 1;
+                deleteButton.setVisibility(View.VISIBLE);
+                wine_glass_btn.setVisibility(View.GONE);
+                cocktail_glass_btn.setVisibility(View.GONE);
+                result_.setVisibility(View.VISIBLE);
+                complete_btn.setVisibility(View.VISIBLE);
+
+                //2d ui로 설명하기
+                try{Frame frame = arFragment.getArSceneView().getArFrame();
+                    Session session = arFragment.getArSceneView().getSession();
+                    Anchor anchor = session.createAnchor(
+                            frame.getCamera().getPose()
+                                    .compose(Pose.makeTranslation(0, 0, -1f)) //This will place the anchor 1M in front of the camera
+                                    .extractTranslation());
+                    AnchorNode addedAnchorNode = new AnchorNode(anchor);
+                    addedAnchorNode.setEnabled(true);
+                    //결과 넣기
+                    TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+                    String msg = "와인형 잔 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
+                            "\n\n너비 측정 방법 : \n\n" +
+                            "화면에 보이는 컵의 윗면 지름을 측정하도록 두 점을 설정해주세요." +
+                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
+                    text.setText(msg);
+                    //닫기 누르면 사라지도록
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
+                            addedAnchorNode.setEnabled(false);
+                        }
+                    });
+                    addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+                    addedAnchorNode.setRenderable(renderable_ui_info);
+                    addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
+                }
+                catch (Exception e){
+                    new SweetAlertDialog(CameraguideActivity.this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("Oops...")
+                            .setContentText("카메라는 컵을 향하게 들어주세요!")
+                            .show();
+                    wine_glass_btn.setVisibility(View.VISIBLE);
+                    cancel_btn.setVisibility(View.GONE);
+                    result_.setVisibility(View.GONE);
+                    complete_btn.setVisibility(View.GONE);
+                    numberOfAnchors = MAX_ANCHORS;
+                    create_mode = 0;
+                    deleteButton.setVisibility(View.GONE);
+                    heightButton.setVisibility(View.GONE);
+                }
+            }
+        });
+        cocktail_glass_btn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cupname = "cocktail";
+                mug_cup_btn.setVisibility(View.GONE);
+                cancel_btn.setVisibility(View.VISIBLE);
+                numberOfAnchors = 0;
+                create_mode = 1;
+                deleteButton.setVisibility(View.VISIBLE);
+                wine_glass_btn.setVisibility(View.GONE);
+                cocktail_glass_btn.setVisibility(View.GONE);
+                result_.setVisibility(View.VISIBLE);
+                complete_btn.setVisibility(View.VISIBLE);
+
+                //2d ui로 설명하기
+                try{Frame frame = arFragment.getArSceneView().getArFrame();
+                    Session session = arFragment.getArSceneView().getSession();
+                    Anchor anchor = session.createAnchor(
+                            frame.getCamera().getPose()
+                                    .compose(Pose.makeTranslation(0, 0, -1f)) //This will place the anchor 1M in front of the camera
+                                    .extractTranslation());
+                    AnchorNode addedAnchorNode = new AnchorNode(anchor);
+                    addedAnchorNode.setEnabled(true);
+                    //결과 넣기
+                    TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+                    String msg = "삼각형(칵테일) 잔 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
+                            "\n\n너비 측정 방법 : \n\n" +
+                            "화면에 보이는 컵의 윗면 지름을 측정하도록 두 점을 설정해주세요." +
+                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
+                    text.setText(msg);
+                    //닫기 누르면 사라지도록
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
+                            addedAnchorNode.setEnabled(false);
+                        }
+                    });
+                    addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+                    addedAnchorNode.setRenderable(renderable_ui_info);
+                    addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
+                }
+                catch (Exception e){
+                    new SweetAlertDialog(CameraguideActivity.this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("Oops...")
+                            .setContentText("카메라는 컵을 향하게 들어주세요!")
+                            .show();
+                    mug_cup_btn.setVisibility(View.VISIBLE);
+                    cancel_btn.setVisibility(View.GONE);
+                    result_.setVisibility(View.GONE);
+                    complete_btn.setVisibility(View.GONE);
+                    numberOfAnchors = MAX_ANCHORS;
+                    create_mode = 0;
+                    deleteButton.setVisibility(View.GONE);
+                    heightButton.setVisibility(View.GONE);
+                }
+            }
+        });
         //완료 버튼 -가이드 시작 버튼- 클릭리스너
         complete_btn.setOnClickListener(new Button.OnClickListener(){
             @Override
