@@ -79,6 +79,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Button complete_btn;
     private Button result_;
     private String cupname;
+    private boolean cancle;
 
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
@@ -169,6 +170,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         mug_cup_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cancle = false;
                 cupname = "mug";
                 mug_cup_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.VISIBLE);
@@ -193,8 +195,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
                     String msg = "머그컵 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
                             "\n\n너비 측정 방법 : \n\n" +
-                            "화면에 보이는 컵의 밑면 지름을 측정하도록 두 점을 설정해주세요." +
-                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "화면에 보이는 컵의 밑면 지름을 측정하도록 화면을 터치하여 두 점을 설정해주세요." +
                             "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
                     text.setText(msg);
                     //닫기 누르면 사라지도록
@@ -228,6 +229,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         wine_glass_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cancle = false;
                 cupname = "wine";
                 mug_cup_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.VISIBLE);
@@ -287,6 +289,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         cocktail_glass_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                cancle = false;
                 cupname = "cocktail";
                 mug_cup_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.VISIBLE);
@@ -311,8 +314,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
                     String msg = "삼각형(칵테일) 잔 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
                             "\n\n너비 측정 방법 : \n\n" +
-                            "화면에 보이는 컵의 윗면 지름을 측정하도록 두 점을 설정해주세요." +
-                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                            "화면에 보이는 컵의 윗면 지름을 측정하도록 화면을 터치하여 두 점을 설정해주세요." +
                             "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
                     text.setText(msg);
                     //닫기 누르면 사라지도록
@@ -379,9 +381,11 @@ public class CameraguideActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 //여기서는 모든걸 원점으로 되돌림,,
+                cancle = true;
                 mug_cup_btn.setVisibility(View.VISIBLE);
                 wine_glass_btn.setVisibility(View.VISIBLE);
                 cocktail_glass_btn.setVisibility(View.VISIBLE);
+                complete_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.GONE);
                 renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
                 renderable_ui_result.getView().findViewById(R.id.close_btn).performClick();
@@ -529,6 +533,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
 
         //2d ui를 렌더링함. 방법 : 그냥 두 점 사이 중간값을 측정해서 노드 추가하고 그 위치에 띄워준 것.
+        renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
         Session session = arFragment.getArSceneView().getSession();
         Anchor anchor = session.createAnchor(midPosition);
         resultanchor = new AnchorNode(anchor);
@@ -542,10 +547,21 @@ public class CameraguideActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
+
                 resultanchor.setEnabled(false);
-                if (s.equals("w")) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
+
+                if (s.equals("w")&&cancle!=true) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
                     renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
                     removeAnchorNode(); // 노드 하나 삭제
+                    if (!cupname.equals("mug")){
+                        removeAnchorNode(); // 노드 둘다 삭제하고 중간에 노드 찍음
+                        AnchorNode anchorNode_ = new AnchorNode(anchor);
+                        anchorNode_.setParent(arFragment.getArSceneView().getScene());
+                        anchorNode_.setRenderable(sphere);
+                        anchorNode_.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+                        anchorNodeList.add(anchorNode_);
+                        numberOfAnchors++;
+                    }
                     createAnchorNode_height();
                     heightButton.setVisibility(View.VISIBLE);
                     //위에서 닫고 다시 만든것 (세로 측정 안내 텍스트용으로)
@@ -585,10 +601,19 @@ public class CameraguideActivity extends AppCompatActivity implements
     public void createAnchorNode_height() {
         if (numberOfAnchors < MAX_ANCHORS) {
             //새로운 높이를 표현할 앵커 설치, 기준이 될 앵커의 pose를 가져옴 : 가장 처음에 만든 앵커의 포즈를 가져옴
-            Pose standard = anchorNodeList.get(0).getAnchor().getPose();
-            //그 포즈를 기준으로 y가 5cm 높은 pose를 생성
-            Pose newpose = standard.compose(Pose.makeTranslation(0, 0.05f, 0));
-
+            //그 포즈를 기준으로 y가 5cm 높은 pose를 생성 - 원기둥을 빼고는 다 아래로 가야함.
+            Pose newpose = null;
+            switch (cupname){
+                case "mug":
+                    Pose standard = anchorNodeList.get(0).getAnchor().getPose();
+                    newpose = standard.compose(Pose.makeTranslation(0, 0.05f, 0));
+                    break;
+                case "wine":
+                case "cocktail":
+                    Pose standard_else = width_pose[2];
+                    newpose = standard_else.compose(Pose.makeTranslation(0, -0.05f, 0));
+                    break;
+            }
             Session session = arFragment.getArSceneView().getSession();
             Anchor anchor = session.createAnchor(newpose);
             AnchorNode anchorNode = new AnchorNode(anchor);
@@ -603,9 +628,18 @@ public class CameraguideActivity extends AppCompatActivity implements
         } else {
             //노드가 2개 생성된 상태에서 한번 더 누르게 되면, 그 노드를 위로 이동시킴
             Anchor currentAnchor = selectedAnchorNode.getAnchor();
-            //높이노드 생성시와 마찬가지로, 포즈를 가져와서 y를 이동시킨 pose를 만들어줌
+            //높이노드 생성시와 마찬가지로, 포즈를 가져와서 y를 이동시킨 pose를 만들어줌 - 원기둥만 위로 올라가야함
             Pose oldPose = currentAnchor.getPose();
-            Pose newPose = oldPose.compose(Pose.makeTranslation(0, 0.01f, 0));
+            Pose newPose = null;
+            switch (cupname){
+                case "mug":
+                    newPose = oldPose.compose(Pose.makeTranslation(0, 0.01f, 0));
+                    break;
+                case "wine":
+                case "cocktail":
+                    newPose = oldPose.compose(Pose.makeTranslation(0, -0.01f, 0));
+                    break;
+            }
             selectedAnchorNode = moveRenderable(selectedAnchorNode, newPose);
         }
     }
@@ -624,46 +658,64 @@ public class CameraguideActivity extends AppCompatActivity implements
 
         return newanchorNode;
     }
-    //가이드 시작하는 함수
+    //가이드 시작하는 함수 !!이 함수 원뿔대는 쓰지 않을것!!
     private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
+        //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
+        //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성 => 그냥 앵커 고개를 회전시킴 안됌
+        //원의 방정식을 이용 가로 배열 마지막 원소가 미드 포지션임. 중심 (a, b, c)라고 하면 y값은 무시하고 x와 z로만 방정식을 만듦
+        //(x-a)^2 + (z-c)^2 = r^2 으로 이 위에 있는 점들을 구한다.
+        //인자로 넘어온 radius 값은 cm단위고 오픈gl은 m단위체계이므로 100을 나눠주도록 한다.
+        //<editor-fold desc="원 만들어주는 과정">
+        double radius = (cup_width / 2)/100;
+
+        Pose midPosition = width_pose[2];
+
+        //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
+        float[] x_positions = new float[8];
+        x_positions[0] = width_pose[0].tx();
+        x_positions[7] = width_pose[1].tx();
+
+        float[] z_positions = calc_position(radius, midPosition, x_positions);
+
+        Pose[] pose_list = make_pose(x_positions,width_pose[0],z_positions);
+
+        pose_list[0] = width_pose[0];
+        pose_list[13] = width_pose[1];
+
+        Session session = arFragment.getArSceneView().getSession();
+        Anchor[] anchors = new Anchor[14];
+        AnchorNode[] anchornodes = new AnchorNode[14];
+
+        //0과 마지막 13번인덱스는 위에서 줬음.
+        for (int i = 1;i<13;i++){
+            anchors[i] = session.createAnchor(pose_list[i]);
+            anchornodes[i] = new AnchorNode(anchors[i]);
+            place(anchornodes[i], "");
+        }
+        //0과 마지막 13번째는 빨간색 노드로 표시할거임
+        anchors[0] = session.createAnchor(pose_list[0]);
+        anchornodes[0] = new AnchorNode(anchors[0]);
+        place(anchornodes[0], "r");
+        anchors[13] = session.createAnchor(pose_list[13]);
+        anchornodes[13] = new AnchorNode(anchors[13]);
+        place(anchornodes[13], "r");
+        //</editor-fold desc="원 만들어주는 과정">
+        float height;
         switch (cupname){
             case "mug":
-                //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
-                //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성 => 그냥 앵커 고개를 회전시킴 안됌
-                //원의 방정식을 이용 가로 배열 마지막 원소가 미드 포지션임. 중심 (a, b, c)라고 하면 y값은 무시하고 x와 z로만 방정식을 만듦
-                //(x-a)^2 + (z-c)^2 = r^2 으로 이 위에 있는 점들을 구한다.
-                //인자로 넘어온 radius 값은 cm단위고 오픈gl은 m단위체계이므로 100을 나눠주도록 한다.
-                double radius = (cup_width / 2)/100;
-                Pose midPosition = width_pose[2];
-                float[] x_positions = new float[5];
-                x_positions[0] = width_pose[0].tx();
-                x_positions[4] = width_pose[1].tx();
-                float[] z_positions = calc_position(radius, midPosition, x_positions);
-
-                Pose[] pose_list = make_pose(x_positions,width_pose[0],z_positions);
-                pose_list[0] = width_pose[0];
-                pose_list[7] = width_pose[1];
-
-                Session session = arFragment.getArSceneView().getSession();
-                Anchor[] anchors = new Anchor[8];
-                AnchorNode[] anchornodes = new AnchorNode[8];
-                for (int i = 1;i<7;i++){
-                    anchors[i] = session.createAnchor(pose_list[i]);
-                    anchornodes[i] = new AnchorNode(anchors[i]);
-                    place(anchornodes[i], "");
-                }
-                anchors[0] = session.createAnchor(pose_list[0]);
-                anchornodes[0] = new AnchorNode(anchors[0]);
-                place(anchornodes[0], "r");
-                anchors[7] = session.createAnchor(pose_list[7]);
-                anchornodes[7] = new AnchorNode(anchors[7]);
-                place(anchornodes[7], "r");
-                float height = 0.03f;
+                //가이드 진행에 맞게 height 맞춰서 make실린더도 변수를 바꿔가며 실행시키면 된다.
+                height = 0.03f;
                 make_cylinder(radius, height, midPosition,width_pose[0]);
                 break;
-            case "wine":
-                break;
-            case "tri":
+            case "cocktail":
+                Log.i("info","가이드");
+                Toast.makeText(this, "가이드 시작함", Toast.LENGTH_SHORT).show();
+                //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
+                //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
+                //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
+                make_polygon(anchornodes, midPosition, "circle");
+                make_polygon(anchornodes, height_pose[1], "side");
+                height = 0.03f;
                 break;
             default:
                 break;
@@ -671,9 +723,9 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     //가이드 밑면 원호 그리는 포지션들 계산해서 z리스트 리턴
     private float[] calc_position(double radius, Pose midposition, float[] x){
-        float[] z_list = new float[8]; // 0과 7번째 인덱스는 비워둘거임(걍 헷갈려서 크기 맞춤,,)
-        float cm = ((x[4] - x[0]) / 4);
-        for (int i = 1; i<4; i++){
+        float[] z_list = new float[14]; // 0과 11번째 인덱스는 비워둘거임(걍 헷갈려서 크기 맞춤,,)
+        float cm = ((x[7] - x[0]) / 7);
+        for (int i = 1; i<7; i++){
             x[i] = x[0] + i*cm;
             z_list[(2*i)-1] = (float)Math.sqrt(Math.pow(radius,2) - Math.pow((x[i] - midposition.tx()),2))+midposition.tz();
             z_list[2*i] = (float)-Math.sqrt(Math.pow(radius,2) - Math.pow((x[i] - midposition.tx()),2))+midposition.tz();
@@ -682,15 +734,15 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     //가이드 밑면 원 그려줄 앵커들 포즈 생성하는 함수
     private Pose[] make_pose(float[] x, Pose w_pos, float[] z){
-        Pose[] p_list = new Pose[8];
-        float[][] position = new float[6][];
+        Pose[] p_list = new Pose[14];
+        float[][] position = new float[12][];
         float[] quat = {0.0f,0.0f,0.f,0.0f};
         int i = 1;
-        for (int j = 0; j < 6; j++) {
+        for (int j = 0; j < 12; j++) {
             position[j] = new float[]{x[i], w_pos.ty(), z[j+1]};
             if((j+1)%2==0) i++;
         }
-        for (int j = 1; j<7; j++){
+        for (int j = 1; j<13; j++){
             p_list[j] = new Pose(position[j-1], quat);
         }
         return p_list;
@@ -726,7 +778,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private double calculateVolume(double radius, double height) {
         return Math.pow(radius,2) * Math.PI * height;
     }
-    //원 그려주는 함수.
+    //원기둥 그려주는 함수.
     private void make_cylinder(double radius,float height, Pose mid, Pose width){
         Color color2 = new Color(255, 140, 50, 0.35f);
         MaterialFactory.makeTransparentWithColor(this, color2)
@@ -746,5 +798,107 @@ public class CameraguideActivity extends AppCompatActivity implements
                             anchorNode.setRenderable(Cylinder);
                         });
     }
+    //원을 그려줄 함수
+    private void make_polygon(AnchorNode[] anchorNodes, Pose pos, String polygon){
+        Log.i("info","폴리곤 함수");
+        Toast.makeText(this, "폴리곤 함수", Toast.LENGTH_SHORT).show();
+         Session session = arFragment.getArSceneView().getSession();
+         Anchor anchor_pos = session.createAnchor(pos);
+         AnchorNode anchornode_pos = new AnchorNode(anchor_pos);
+         anchornode_pos.setParent(arFragment.getArSceneView().getScene());
+         if(polygon.equals("circle") || polygon.equals("side")){
+             //인덱스가 이상해서 .. ㅜ
+             for (int i = 0; i<3; i++){
+                 if (i/2==1){
+                     List<AnchorNode> anchorsList = new ArrayList<>();
+                     anchorsList.add(anchorNodes[12]);
+                     anchorsList.add(anchorNodes[13]);
+                     anchorsList.add(anchornode_pos);
+                     make_mash(anchorsList);
+                 }
+                 else{
+                     List<AnchorNode> anchorsList = new ArrayList<>();
+                     anchorsList.add(anchorNodes[0]);
+                     anchorsList.add(anchorNodes[i+1]);
+                     anchorsList.add(anchornode_pos);
+                     make_mash(anchorsList);
+                 }
+             }
+             for (int i = 1; i<12; i++){
+                 List<AnchorNode> anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes[i]);
+                 anchorsList.add(anchorNodes[i+2]);
+                 anchorsList.add(anchornode_pos);
+                 make_mash(anchorsList);
+             }
+         }
 
+
+    }
+    //매쉬 만들어주는 함수
+    private void make_mash(List<AnchorNode> anchorsList){
+        Log.i("info","매쉬");
+        Toast.makeText(this, "매쉬", Toast.LENGTH_SHORT).show();
+        if (anchorsList.size() == 3) {
+            Color color2 = new Color(255, 0, 0, 0.5f);
+            MaterialFactory.makeTransparentWithColor(this, color2)
+                    .thenAccept(material -> {
+                                final Node node = new Node();
+                                final ModelRenderable triangle = makeTriangleWithAnchors(anchorsList, material);
+                                node.setParent(arFragment.getArSceneView().getScene());
+                                node.setRenderable(triangle);
+                            });
+        }
+    }
+    private ModelRenderable makeTriangleWithAnchors(@NonNull final List<AnchorNode> anchorNodes, @NonNull final Material material) {
+        Log.i("info","삼각형");
+        Toast.makeText(this, "삼각형", Toast.LENGTH_SHORT).show();
+        if (anchorNodes.size() != 3) throw new IllegalStateException("Different count of anchorsList than 3");
+
+        final Vector3 p0 = anchorNodes.get(0).getLocalPosition();
+        final Vector3 p1 = anchorNodes.get(1).getLocalPosition();
+        final Vector3 p2 = anchorNodes.get(2).getLocalPosition();
+        final Vector3 up = Vector3.up();
+        final Vertex.UvCoordinate uvTop = new Vertex.UvCoordinate(0.5f, 1.0f);
+        final Vertex.UvCoordinate uvBotLeft = new Vertex.UvCoordinate(0.0f, 0.0f);
+        final Vertex.UvCoordinate uvBotRight = new Vertex.UvCoordinate(1.0f, 0.0f);
+        final List<Vertex> vertices = new ArrayList<>(Arrays.asList(
+                Vertex.builder().setPosition(p0).setNormal(up).setUvCoordinate(uvTop).build(),
+                Vertex.builder().setPosition(p1).setNormal(up).setUvCoordinate(uvBotRight).build(),
+                Vertex.builder().setPosition(p2).setNormal(up).setUvCoordinate(uvBotLeft).build()
+        ));
+
+        final List<Integer> triangleIndices = new ArrayList<>(3);
+        triangleIndices.add(0);
+        triangleIndices.add(2);
+        triangleIndices.add(1);
+        triangleIndices.add(0);
+        triangleIndices.add(1);
+        triangleIndices.add(2);
+
+        final RenderableDefinition.Submesh submesh = RenderableDefinition.Submesh.builder()
+                .setTriangleIndices(triangleIndices)
+                .setMaterial(material)
+                .build();
+        final RenderableDefinition renderableDefinition = RenderableDefinition.builder()
+                .setVertices(vertices)
+                .setSubmeshes(Arrays.asList(submesh))
+                .build();
+        final CompletableFuture future = ModelRenderable.builder()
+                .setSource(renderableDefinition)
+                .build();
+
+        final ModelRenderable result;
+        try {
+            result = (ModelRenderable) future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new AssertionError("Error creating renderable.", e);
+        }
+
+        if (result == null) {
+            throw new AssertionError("Error creating renderable.");
+        } else {
+            return result;
+        }
+    }
 }
