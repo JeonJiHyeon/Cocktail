@@ -50,42 +50,40 @@ public class CocktaillistActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            ArrayList<ArrayList<String>> datas = new ArrayList<ArrayList<String>>();
-                            ArrayList<String> arr = new ArrayList<>();
+                            ArrayList<Cocktail> cocktails = new ArrayList<Cocktail>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "바깥 포문"+document.getId() + " => " + document.getData());
-                                arr.add(document.getId());
-                                arr.add(document.getString("name"));
-                                arr.add(document.getString("base"));
+                                ArrayList<ArrayList<String>> recipe = new ArrayList<>();
                                 db.collection("cocktails").document(document.getId()).collection("recipe")
                                         .get()
                                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                 if (task.isSuccessful()) {
-
                                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        arr.add(document.getId());
-                                                        arr.add(document.get("order").toString());
-                                                        arr.add(document.getString("ingredient"));
-                                                        arr.add(document.get("quantity").toString());
-                                                        arr.add(document.getString("unit"));
-                                                        arr.add(document.getString("recipe_text"));
-                                                        datas.add(arr);
-                                                        Log.d(TAG, "안쪽 포문"+document.getId() + " => " + document.getData());
+                                                        ArrayList<String> recipe_steps = new ArrayList<>();
+                                                        recipe_steps.add(document.get("order").toString());
+                                                        recipe_steps.add(document.getString("ingredient"));
+                                                        recipe_steps.add(document.get("quantity").toString());
+                                                        recipe_steps.add(document.getString("unit"));
+                                                        recipe_steps.add(document.getString("recipe_text"));
+                                                        recipe.add(recipe_steps);
+                                                        Log.d(TAG, document.getId() + " => " + document.getData());
                                                     }
                                                     // 리사이클러뷰에 LinearLayoutManager 객체 지정.
                                                     Rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
 
                                                     // 리사이클러뷰에 SimpleTextAdapter 객체 지정. 이부분에 따라 추가됨 지금은 2개 추
-                                                    CocktailAdapter adapter = new CocktailAdapter(datas);
+                                                    CocktailAdapter adapter = new CocktailAdapter(cocktails);
+                                                    Log.d(TAG,  "로그"+cocktails.get(0).getId()+cocktails.get(0).getRecipe().get(0));
                                                     Rv.setAdapter(adapter);
                                                 } else {
                                                     Log.w(TAG, "Error getting documents.", task.getException());
                                                 }
                                             }
                                         });
-
+                                Cocktail cocktail = new Cocktail(document.getString("id"), document.getString("name"), document.getString("base"), recipe);
+                                cocktails.add(cocktail);
+                                Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());

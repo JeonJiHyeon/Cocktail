@@ -6,9 +6,9 @@ public class Cocktail {
     String id;
     String name;
     String base;
-    ArrayList<String>[] recipe;
+    ArrayList<ArrayList<String>> recipe;
 
-    public Cocktail(String id, String name, String base, ArrayList<String>[] recipe) {
+    public Cocktail(String id, String name, String base, ArrayList<ArrayList<String>> recipe) {
         this.id = id;
         this.name = name;
         this.base = base;
@@ -39,11 +39,11 @@ public class Cocktail {
         this.base = base;
     }
 
-    public ArrayList<String>[] getRecipe() {
+    public ArrayList<ArrayList<String>> getRecipe() {
         return recipe;
     }
 
-    public void setRecipe(ArrayList<String>[] recipe) {
+    public void setRecipe(ArrayList<ArrayList<String>> recipe) {
         this.recipe = recipe;
     }
 
