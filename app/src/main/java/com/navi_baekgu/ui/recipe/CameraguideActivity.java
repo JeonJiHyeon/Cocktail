@@ -63,9 +63,9 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Integer create_mode = 0;
     //길이정보 저장해줄 변수
     private double cup_height;
-    private double cup_width;
+    private double cup_width, cup_width_under;
     private double cup_volume;
-    private Pose width_pose[];
+    private Pose width_pose[], width_pose_under[];
     private Pose height_pose[];
     //지금 선택한 노드를 가르킬것 - height 측정시 사용됨
     private AnchorNode selectedAnchorNode = null;
@@ -230,7 +230,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 cancle = false;
-                cupname = "wine";
+                cupname = "paper";
                 mug_cup_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.VISIBLE);
                 numberOfAnchors = 0;
@@ -252,10 +252,9 @@ public class CameraguideActivity extends AppCompatActivity implements
                     addedAnchorNode.setEnabled(true);
                     //결과 넣기
                     TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
-                    String msg = "와인형 잔 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
-                            "\n\n너비 측정 방법 : \n\n" +
-                            "화면에 보이는 컵의 윗면 지름을 측정하도록 두 점을 설정해주세요." +
-                            "\n\n설정 후에는 화면을 한번 더 터치하세요."+
+                    String msg = "종이컵형 잔 측정 안내 - 컵의 윗면 너비 측정 후 높이를 측정하고, 그 후 밑면 너비를 측정합니다." +
+                            "\n\n윗면 너비 측정 방법 : \n\n" +
+                            "화면에 보이는 컵의 밑면 지름을 측정하도록 화면을 터치하여 두 점을 설정해주세요." +
                             "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
                     text.setText(msg);
                     //닫기 누르면 사라지도록
@@ -286,6 +285,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
             }
         });
+        //삼각잔
         cocktail_glass_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -349,11 +349,36 @@ public class CameraguideActivity extends AppCompatActivity implements
         complete_btn.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View view) {
-                if(cup_width<=0&&cup_height<=0){
+                if(cup_width<=0&&cup_height<=0&&cup_width_under<=0){
                     Toast.makeText(CameraguideActivity.this, "길이 측정 완료 후 눌러주세요.", Toast.LENGTH_SHORT).show();
                 }
                 else if(cup_height<=0){
                     Toast.makeText(CameraguideActivity.this, "높이 측정이 완료되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                }
+                else if(cupname.equals("paper")){
+                    if(cup_width_under<=0){
+                        Log.i("info", "안쪽 이프 문");
+                        Toast.makeText(CameraguideActivity.this, "밑면 너비 측정이 완료되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        //모든 ui 없애고 시작
+                        renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
+                        renderable_ui_result.getView().findViewById(R.id.close_btn).performClick();
+                        //볼륨 계산 필요
+                        deleteButton.setVisibility(View.GONE);
+                        heightButton.setVisibility(View.GONE);
+                        mug_cup_btn.setVisibility(View.GONE);
+                        wine_glass_btn.setVisibility(View.GONE);
+                        cocktail_glass_btn.setVisibility(View.GONE);
+                        cancel_btn.setVisibility(View.GONE);
+                        complete_btn.setVisibility(View.GONE);
+                        result_.setVisibility(View.GONE);
+                        while (numberOfAnchors!=0) {
+                            deleteButton.performClick();
+                        }
+                        numberOfAnchors = MAX_ANCHORS;
+                        start_guide(cupname, cup_width, cup_height, width_pose, height_pose);
+                    }
                 }
                 else {
                     //모든 ui 없애고 시작
@@ -396,8 +421,10 @@ public class CameraguideActivity extends AppCompatActivity implements
                 heightButton.setVisibility(View.GONE);
                 cup_height = 0;
                 cup_width = 0;
+                cup_width_under = 0;
                 width_pose = null;
                 height_pose = null;
+                width_pose_under = null;
                 cupname = "";
                 while (numberOfAnchors!=0) {
                     deleteButton.performClick();
@@ -464,6 +491,10 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Toast.makeText(this, "Calc distance for width", Toast.LENGTH_SHORT).show();
                 Calc_distance("w"); // 너비 계산 -> 세로 노드 찍기로 자동 넘어감
             }
+            if (numberOfAnchors == MAX_ANCHORS && width_pose!=null&&height_pose!=null&&width_pose_under==null) {
+                Toast.makeText(this, "Calc distance for under width", Toast.LENGTH_SHORT).show();
+                Calc_distance("w_under");
+            }
 
         } else if(create_mode != 0) { // 2번 이상 터치(이미 노드가 2번 생성됨)시 무조건 계산, 초기값이 2번 이상 터치 상태이므로 create_mode==1일 때만 작동하도록
             Log.d(TAG,"MAX_ANCHORS exceeded");
@@ -487,12 +518,16 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void save_result(double result, String mode){
         switch (mode){
             case "w":
-                cup_width = result * 100;
-                result_.setText("가로 측정 결과 : "+cup_width);
+                cup_width = (Math.round(result * 100) / 100.0) *100;
+                result_.setText("너비 측정 결과 : "+cup_width);
                 break;
             case "h":
-                cup_height = result * 100;
+                cup_height = (Math.round(result * 100) / 100.0) *100;
                 result_.setText("세로 측정 결과 : "+cup_height);
+                break;
+            case "w_under":
+                cup_width_under = (Math.round(result * 100) / 100.0) *100;
+                result_.setText("너비 측정 결과 : "+cup_width_under);
                 break;
             default:
                 break;
@@ -528,6 +563,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Pose pose3 = new Pose(pos3,mid_q);
                 Pose pose4 = new Pose(pos4,mid_q);
                 width_pose = new Pose[]{pose3,pose4,midPosition};
+                break;
+            case "w_under":
+                //가로 모드는 중간값을 넘겨준다. 세로는 그럴 필요 없는듯?
+                float[] pos5 = {anchorNodeList.get(0).getWorldPosition().x,anchorNodeList.get(0).getWorldPosition().y,anchorNodeList.get(0).getWorldPosition().z};
+                float[] pos6 = {anchorNodeList.get(1).getWorldPosition().x,anchorNodeList.get(1).getWorldPosition().y,anchorNodeList.get(1).getWorldPosition().z};
+                Pose pose5 = new Pose(pos5,mid_q);
+                Pose pose6 = new Pose(pos6,mid_q);
+                width_pose_under = new Pose[]{pose5,pose6,midPosition};
                 break;
         }
 
@@ -573,8 +616,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                     AnchorNode addedAnchorNode = new AnchorNode(anchor);
                     addedAnchorNode.setEnabled(true);
                     TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
-                    String msg = "머그컵 측정 안내 - 컵의 너비 측정 후 높이를 측정합니다." +
-                            "\n\n높이 측정 방법 : \n\n" +
+                    String msg =
+                            "높이 측정 방법 : \n\n" +
                             "상단의 세로 아이콘 버튼을 눌러 두 점 사이의 간격을 조정해 컵의 높이를 설정해주세요."+
                             "\n\n설정 후에는 화면을 한번 더 터치하세요."+
                             "\n\n높이 측정이 종료되면, 완료 버튼을 눌러주세요.\n";
@@ -589,6 +632,38 @@ public class CameraguideActivity extends AppCompatActivity implements
                     addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
                     addedAnchorNode.setRenderable(renderable_ui_info);
                     addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
+                }
+                if (s.equals("h")&&cancle!=true) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
+
+                    removeAnchorNode();
+                    removeAnchorNode();
+
+                    heightButton.setVisibility(View.GONE);
+                    //위에서 닫고 다시 만든것 (세로 측정 안내 텍스트용으로)
+                    Frame frame = arFragment.getArSceneView().getArFrame();
+                    Anchor anchor = session.createAnchor(
+                            frame.getCamera().getPose()
+                                    .compose(Pose.makeTranslation(0, 0, -1f)) //This will place the anchor 1M in front of the camera
+                                    .extractTranslation());
+                    AnchorNode addedAnchorNode_ = new AnchorNode(anchor);
+                    addedAnchorNode_.setEnabled(true);
+                    TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+                    String msg =
+                            "밑면 너비 측정 방법 : \n\n" +
+                                    "화면에 보이는 컵의 밑면 지름을 측정하도록 화면을 터치하여 두 점을 설정해주세요." +
+                                    "\n\n측정이 완료되면, 높이 측정 단계로 넘어갑니다.";
+                    text.setText(msg);
+                    //닫기 누르면 사라지도록
+                    renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            addedAnchorNode_.setEnabled(false);
+
+                        }
+                    });
+                    addedAnchorNode_.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+                    addedAnchorNode_.setRenderable(renderable_ui_info);
+                    addedAnchorNode_.setParent(arFragment.getArSceneView().getScene());
                 }
             }
         });
@@ -608,7 +683,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     Pose standard = anchorNodeList.get(0).getAnchor().getPose();
                     newpose = standard.compose(Pose.makeTranslation(0, 0.05f, 0));
                     break;
-                case "wine":
+                case "paper":
                 case "cocktail":
                     Pose standard_else = width_pose[2];
                     newpose = standard_else.compose(Pose.makeTranslation(0, -0.05f, 0));
@@ -635,7 +710,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 case "mug":
                     newPose = oldPose.compose(Pose.makeTranslation(0, 0.01f, 0));
                     break;
-                case "wine":
+                case "paper":
                 case "cocktail":
                     newPose = oldPose.compose(Pose.makeTranslation(0, -0.01f, 0));
                     break;
@@ -715,8 +790,45 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
                 make_polygon(anchornodes, midPosition, "circle");
                 make_polygon(anchornodes, height_pose[1], "side");
-                height = 0.03f;
+                //얘는 높이에 따라서 원들의 y값을 바꿔줘야 할듯..?
                 break;
+            case "paper":
+                //아오 함수로 만들걸
+                //<editor-fold desc="밑면 원 만들어주는 과정">
+                double radius_under = (cup_width_under / 2)/100;
+
+                Pose midPosition_under = width_pose_under[2];
+
+                //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
+                float[] x_positions_under = new float[8];
+                x_positions_under[0] = width_pose_under[0].tx();
+                x_positions_under[7] = width_pose_under[1].tx();
+
+                float[] z_positions_under = calc_position(radius_under, midPosition_under, x_positions_under);
+
+                Pose[] pose_list_under = make_pose(x_positions_under,width_pose_under[0],z_positions_under);
+
+                pose_list_under[0] = width_pose_under[0];
+                pose_list_under[13] = width_pose_under[1];
+                Anchor[] anchors_under = new Anchor[14];
+                AnchorNode[] anchornodes_under = new AnchorNode[14];
+
+                //0과 마지막 13번인덱스는 위에서 줬음.
+                for (int i = 1;i<13;i++){
+                    anchors_under[i] = session.createAnchor(pose_list_under[i]);
+                    anchornodes_under[i] = new AnchorNode(anchors_under[i]);
+                    place(anchornodes_under[i], "");
+                }
+                //0과 마지막 13번째는 빨간색 노드로 표시할거임
+                anchors_under[0] = session.createAnchor(pose_list_under[0]);
+                anchornodes_under[0] = new AnchorNode(anchors_under[0]);
+                place(anchornodes_under[0], "r");
+                anchors_under[13] = session.createAnchor(pose_list_under[13]);
+                anchornodes_under[13] = new AnchorNode(anchors_under[13]);
+                place(anchornodes_under[13], "r");
+                //</editor-fold desc="밑면 원 만들어주는 과정">
+                make_polygon(anchornodes, midPosition, "circle");
+                make_polygon(anchornodes_under, midPosition_under, "circle");
             default:
                 break;
         }
