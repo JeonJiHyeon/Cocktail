@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.recipe.RecipeFragment">
 
-    <Button
-        android:id="@+id/RecipeButton1"
+    <ImageButton
+        android:id="@+id/All_recipe"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="5dp"
         android:layout_marginRight="10dp"
+        android:src="@drawable/all"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
         android:text="ALL" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/info_text4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="15dp"
@@ -33,31 +37,41 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
-            <Button
-                android:id="@+id/RecipeButton2"
+            <ImageButton
+                android:id="@+id/Gin"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/gin"
+                android:background="@android:color/transparent"
+
                 android:text="진" />
 
-            <Button
-                android:id="@+id/RecipeButton3"
+            <ImageButton
+                android:id="@+id/Vodka"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/vodka"
+                android:background="@android:color/transparent"
                 android:text="보드카" />
 
-            <Button
-                android:id="@+id/RecipeButton4"
+            <ImageButton
+                android:id="@+id/Rum"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/rum"
+                android:background="@android:color/transparent"
                 android:text="럼" />
         </TableRow>
 
@@ -67,31 +81,40 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
-            <Button
-                android:id="@+id/RecipeButton5"
+            <ImageButton
+                android:id="@+id/Tequila"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/tequila"
+                android:background="@android:color/transparent"
                 android:text="테킬라" />
 
-            <Button
-                android:id="@+id/RecipeButton6"
+            <ImageButton
+                android:id="@+id/Whiskey"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/whiskey"
+                android:background="@android:color/transparent"
                 android:text="위스키" />
 
-            <Button
-                android:id="@+id/RecipeButton7"
+            <ImageButton
+                android:id="@+id/Brandy"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/brandy"
+                android:background="@android:color/transparent"
                 android:text="브랜디" />
         </TableRow>
 
@@ -101,31 +124,40 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
-            <Button
-                android:id="@+id/RecipeButton8"
+            <ImageButton
+                android:id="@+id/Liqueur"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/liqueur"
+                android:background="@android:color/transparent"
                 android:text="리큐어" />
 
-            <Button
-                android:id="@+id/RecipeButton9"
+            <ImageButton
+                android:id="@+id/Wine"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/wine"
+                android:background="@android:color/transparent"
                 android:text="와인" />
 
-            <Button
-                android:id="@+id/RecipeButton10"
+            <ImageButton
+                android:id="@+id/Beer"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/beer"
+                android:background="@android:color/transparent"
                 android:text="맥주" />
         </TableRow>
 
@@ -135,22 +167,28 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp">
 
-            <Button
-                android:id="@+id/RecipeButton11"
+            <ImageButton
+                android:id="@+id/Soju"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/soju"
+                android:background="@android:color/transparent"
                 android:text="소주" />
 
-            <Button
-                android:id="@+id/RecipeButton12"
+            <ImageButton
+                android:id="@+id/Non"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginRight="7dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/non"
+                android:background="@android:color/transparent"
                 android:text="논알콜" />
         </TableRow>
     </TableLayout>

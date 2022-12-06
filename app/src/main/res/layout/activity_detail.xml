@@ -9,7 +9,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView14"
+            android:id="@+id/cocktail_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -39,7 +39,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView17"
+                        android:id="@+id/info_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
@@ -48,7 +48,7 @@
                         android:textSize="24sp" />
 
                     <TextView
-                        android:id="@+id/textView18"
+                        android:id="@+id/cocktail_ingredients"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
@@ -58,7 +58,7 @@
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/imageView6"
+                    android:id="@+id/cocktail_image"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_margin="10dp"
@@ -68,7 +68,7 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/textView19"
+                android:id="@+id/info_text2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -77,7 +77,7 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/textView20"
+                android:id="@+id/cocktail_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
@@ -88,7 +88,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textView16"
+            android:id="@+id/info_text3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
@@ -112,7 +112,7 @@
                 android:text="카메라 가이드" />
 
             <Button
-                android:id="@+id/button13"
+                android:id="@+id/Guide_youtube"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
