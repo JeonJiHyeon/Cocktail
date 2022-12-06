@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -51,19 +49,19 @@ public class DetailActivity extends AppCompatActivity {
         });
         ViewGroup.LayoutParams params = binding.detailLl.getLayoutParams();
         recipe = selected_cocktail.getRecipe();
-        for(int i = 0; i<recipe.size(); i++){
-            if (recipe.get(i).get(1).length()>0){
+        for (int i = 0; i < recipe.size(); i++) {
+            if (recipe.get(i).get(1).length() > 0) {
                 ingredient_string = ingredient_string + recipe.get(i).get(1) + ",\n";
             }
-            recipe_string = recipe_string + (i+1+". ") + recipe.get(i).get(4) + "\n";
-            if (i>6){
+            recipe_string = recipe_string + (i + 1 + ". ") + recipe.get(i).get(4) + "\n";
+            if (i > 6) {
                 params.height = params.height + 20;
-                Log.i("info", ""+params.height);
+                Log.i("info", "" + params.height);
                 binding.detailLl.setLayoutParams(params);
             }
         }
         setContentView(binding.getRoot());
-        ingredient_string  = ingredient_string .substring(0, ingredient_string .length() - 2);
+        ingredient_string = ingredient_string.substring(0, ingredient_string.length() - 2);
         binding.cocktailIngredients.setText(ingredient_string);
         binding.cocktailRecipe.setText(recipe_string);
         binding.GuideCamera.setOnClickListener(new View.OnClickListener() {

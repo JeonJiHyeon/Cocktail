@@ -3,14 +3,9 @@ package com.navi_baekgu.ui.recipe;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,12 +15,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.navi_baekgu.R;
-import com.navi_baekgu.databinding.ActivityCocktaillistBinding;
 import com.navi_baekgu.ui.recycler.Cocktail;
 import com.navi_baekgu.ui.recycler.CocktailAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class CocktaillistActivity extends AppCompatActivity {
     private static final String TAG = "CocktaillistActivity";
@@ -99,6 +92,7 @@ public class CocktaillistActivity extends AppCompatActivity {
                     }
                 });
     }
+
     public void getCocktailList_all() {
         db.collection("cocktails")
                 .get()

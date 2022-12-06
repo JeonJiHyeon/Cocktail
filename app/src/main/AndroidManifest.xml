@@ -18,7 +18,10 @@
         android:theme="@style/Theme.Cocktail">
         <!-- "AR Required" app, requires "Google Play Services for AR" (ARCore)
              to be installed, as the app does not include any non-AR features. -->
-        <meta-data android:name="com.google.ar.core" android:value="required" />
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="required" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -29,9 +32,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.recipe.CocktaillistActivity"/>
-        <activity android:name=".ui.recipe.DetailActivity"/>
-        <activity android:name=".ui.recipe.CameraguideActivity"/>
+        <activity android:name=".ui.recipe.CocktaillistActivity" />
+        <activity android:name=".ui.recipe.DetailActivity" />
+        <activity android:name=".ui.recipe.CameraguideActivity" />
     </application>
 
 </manifest>
