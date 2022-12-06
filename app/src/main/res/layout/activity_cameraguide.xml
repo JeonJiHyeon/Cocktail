@@ -64,10 +64,28 @@
             android:visibility="gone"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/height"
+            android:id="@+id/left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/left"
+            android:visibility="gone" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="90dp"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/right"
+            android:visibility="gone" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="90dp"
             android:layout_marginTop="60dp"
             android:src="@drawable/ic_height"
             android:visibility="gone" />
@@ -76,7 +94,7 @@
             android:id="@+id/delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="90dp"
+            android:layout_marginStart="170dp"
             android:layout_marginTop="60dp"
             android:src="@drawable/ic_delete"
             android:visibility="gone" />

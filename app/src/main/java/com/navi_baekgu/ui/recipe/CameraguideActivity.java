@@ -69,9 +69,13 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Pose height_pose[];
     //지금 선택한 노드를 가르킬것 - height 측정시 사용됨
     private AnchorNode selectedAnchorNode = null;
+    private AnchorNode selectedAnchorNode_left = null;
+    private AnchorNode selectedAnchorNode_right = null;
     //버튼 생성
     private FloatingActionButton deleteButton;
     private FloatingActionButton heightButton;
+    private FloatingActionButton rightButton;
+    private FloatingActionButton leftButton;
     private Button mug_cup_btn;
     private Button wine_glass_btn;
     private Button cocktail_glass_btn;
@@ -85,9 +89,11 @@ public class CameraguideActivity extends AppCompatActivity implements
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
     private final Color color = new Color(android.graphics.Color.parseColor("#ff0051"));
     private final Color color2 = new Color(android.graphics.Color.parseColor("#ffdee8"));
-    private Renderable sphere, guide_sphere;
+    private final Color color3 = new Color(android.graphics.Color.parseColor("#c4d1ff"));
+    private Renderable sphere, guide_sphere, under_sphere;
     private ViewRenderable renderable_ui_info, renderable_ui_result;
     private AnchorNode resultanchor;
+    private AnchorNode anchorNode_u;
     //</editor-fold desc="변수 생성구간">
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +113,8 @@ public class CameraguideActivity extends AppCompatActivity implements
         complete_btn = findViewById(R.id.complete_btn);
         heightButton = findViewById(R.id.height);
         result_ = (Button)findViewById(R.id.flag);
+        leftButton = findViewById(R.id.left);
+        rightButton = findViewById(R.id.right);
 //</editor-fold desc="변수 매칭구간">
         numberOfAnchors = MAX_ANCHORS;
         getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, fragment) -> {
@@ -133,6 +141,11 @@ public class CameraguideActivity extends AppCompatActivity implements
         MaterialFactory.makeOpaqueWithColor(this, color2)
                 .thenAccept(material -> {
                     guide_sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
+                    sphere.setShadowCaster(false);
+                });
+        MaterialFactory.makeOpaqueWithColor(this, color3)
+                .thenAccept(material -> {
+                    under_sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), material);
                     sphere.setShadowCaster(false);
                 });
         //2d ui를 띄운다. 카메라 유아이라는 xml을 따로 만들어서 뷰 렌더러블 클래스에 적용시킨것. 적용시키는 방법은 위에 있던것들하고 동일
@@ -216,13 +229,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
                     mug_cup_btn.setVisibility(View.VISIBLE);
+                    wine_glass_btn.setVisibility(View.VISIBLE);
+                    cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
                     numberOfAnchors = MAX_ANCHORS;
                     create_mode = 0;
                     deleteButton.setVisibility(View.GONE);
-                    heightButton.setVisibility(View.GONE);
                 }
             }
         });
@@ -275,13 +289,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
                     wine_glass_btn.setVisibility(View.VISIBLE);
+                    mug_cup_btn.setVisibility(View.VISIBLE);
+                    cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
                     numberOfAnchors = MAX_ANCHORS;
                     create_mode = 0;
                     deleteButton.setVisibility(View.GONE);
-                    heightButton.setVisibility(View.GONE);
                 }
             }
         });
@@ -334,14 +349,15 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setTitleText("Oops...")
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
+                    wine_glass_btn.setVisibility(View.VISIBLE);
                     mug_cup_btn.setVisibility(View.VISIBLE);
+                    cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
                     numberOfAnchors = MAX_ANCHORS;
                     create_mode = 0;
                     deleteButton.setVisibility(View.GONE);
-                    heightButton.setVisibility(View.GONE);
                 }
             }
         });
@@ -367,12 +383,15 @@ public class CameraguideActivity extends AppCompatActivity implements
                         //볼륨 계산 필요
                         deleteButton.setVisibility(View.GONE);
                         heightButton.setVisibility(View.GONE);
+                        leftButton.setVisibility(View.GONE);
+                        rightButton.setVisibility(View.GONE);
                         mug_cup_btn.setVisibility(View.GONE);
                         wine_glass_btn.setVisibility(View.GONE);
                         cocktail_glass_btn.setVisibility(View.GONE);
                         cancel_btn.setVisibility(View.GONE);
                         complete_btn.setVisibility(View.GONE);
                         result_.setVisibility(View.GONE);
+                        anchorNode_u.setEnabled(false);
                         while (numberOfAnchors!=0) {
                             deleteButton.performClick();
                         }
@@ -387,12 +406,15 @@ public class CameraguideActivity extends AppCompatActivity implements
                     cup_volume = calculateVolume(cup_width/2, cup_height);
                     deleteButton.setVisibility(View.GONE);
                     heightButton.setVisibility(View.GONE);
+                    leftButton.setVisibility(View.GONE);
+                    rightButton.setVisibility(View.GONE);
                     mug_cup_btn.setVisibility(View.GONE);
                     wine_glass_btn.setVisibility(View.GONE);
                     cocktail_glass_btn.setVisibility(View.GONE);
                     cancel_btn.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
+                    anchorNode_u.setEnabled(false);
                     while (numberOfAnchors!=0) {
                         deleteButton.performClick();
                     }
@@ -419,6 +441,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 create_mode = 0;
                 deleteButton.setVisibility(View.GONE);
                 heightButton.setVisibility(View.GONE);
+                leftButton.setVisibility(View.GONE);
+                rightButton.setVisibility(View.GONE);
                 cup_height = 0;
                 cup_width = 0;
                 cup_width_under = 0;
@@ -461,6 +485,34 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
             }
         });
+        leftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //height mode
+                if (numberOfAnchors != 0) {
+                    //하나 이상 만들고, 2개 이하. 그니까 딱 하나만 만들었을때 새로운 노드를 만들어줌
+                    if (numberOfAnchors == MAX_ANCHORS && selectedAnchorNode_left == null)
+                        Toast.makeText(getBaseContext(), "You already create 2 nodes for measure width or height", Toast.LENGTH_SHORT).show();
+                    else createAnchorNode_underwidth_left(height_pose[1]);
+                } else {
+                    Toast.makeText(getBaseContext(), "You must create 1 node", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        rightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //height mode
+                if (numberOfAnchors != 0) {
+                    //하나 이상 만들고, 2개 이하. 그니까 딱 하나만 만들었을때 새로운 노드를 만들어줌
+                    if (numberOfAnchors == MAX_ANCHORS && selectedAnchorNode_right == null)
+                        Toast.makeText(getBaseContext(), "You already create 2 nodes for measure width or height", Toast.LENGTH_SHORT).show();
+                    else createAnchorNode_underwidth_right(height_pose[1]);
+                } else {
+                    Toast.makeText(getBaseContext(), "You must create 1 node", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
     //노드 삭제하는 함수
     private void removeAnchorNode() {
@@ -491,10 +543,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Toast.makeText(this, "Calc distance for width", Toast.LENGTH_SHORT).show();
                 Calc_distance("w"); // 너비 계산 -> 세로 노드 찍기로 자동 넘어감
             }
-            if (numberOfAnchors == MAX_ANCHORS && width_pose!=null&&height_pose!=null&&width_pose_under==null) {
-                Toast.makeText(this, "Calc distance for under width", Toast.LENGTH_SHORT).show();
-                Calc_distance("w_under");
-            }
 
         } else if(create_mode != 0) { // 2번 이상 터치(이미 노드가 2번 생성됨)시 무조건 계산, 초기값이 2번 이상 터치 상태이므로 create_mode==1일 때만 작동하도록
             Log.d(TAG,"MAX_ANCHORS exceeded");
@@ -508,7 +556,11 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
                 Calc_distance("h"); // 높이 계산
                 Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
-            } else {
+            }
+            else if (numberOfAnchors == MAX_ANCHORS && width_pose!=null&&height_pose!=null&&width_pose_under==null&&cupname.equals("paper")) {
+                Toast.makeText(this, "Calc distance for under width", Toast.LENGTH_SHORT).show();
+                Calc_distance("w_under");
+            }else {
                 Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
             }
 
@@ -518,15 +570,15 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void save_result(double result, String mode){
         switch (mode){
             case "w":
-                cup_width = (Math.round(result * 100) / 100.0) *100;
+                cup_width = result;
                 result_.setText("너비 측정 결과 : "+cup_width);
                 break;
             case "h":
-                cup_height = (Math.round(result * 100) / 100.0) *100;
+                cup_height = result;
                 result_.setText("세로 측정 결과 : "+cup_height);
                 break;
             case "w_under":
-                cup_width_under = (Math.round(result * 100) / 100.0) *100;
+                cup_width_under = result;
                 result_.setText("너비 측정 결과 : "+cup_width_under);
                 break;
             default:
@@ -539,7 +591,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         float y = anchorNodeList.get(0).getWorldPosition().y - anchorNodeList.get(1).getWorldPosition().y;
         float z = anchorNodeList.get(0).getWorldPosition().z - anchorNodeList.get(1).getWorldPosition().z;
         //유클리디안 거리 계산 및, 소수점 두자리까지 반영
-        double result = Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2)) * 100) / 100.0;
+        double result = Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2)) * 100 * 100) / 100.0;
 
         float mid_x = (anchorNodeList.get(0).getWorldPosition().x + anchorNodeList.get(1).getWorldPosition().x) /2;
         float mid_y = (anchorNodeList.get(0).getWorldPosition().y + anchorNodeList.get(1).getWorldPosition().y) /2;
@@ -584,7 +636,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         resultanchor.setEnabled(true);
         //결과 넣기
         TextView text = renderable_ui_result.getView().findViewById(R.id.result_text);
-        text.setText( (result * 100)+"cm");
+        text.setText( (result)+"cm");
         //닫기 누르면 사라지도록
         renderable_ui_result.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -633,12 +685,20 @@ public class CameraguideActivity extends AppCompatActivity implements
                     addedAnchorNode.setRenderable(renderable_ui_info);
                     addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
                 }
-                if (s.equals("h")&&cancle!=true) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
-
+                if (s.equals("h")&&cancle!=true&&cupname.equals("paper")) {    // 너비 계산 닫기 누른 후, 세로 노드 찍기
                     removeAnchorNode();
                     removeAnchorNode();
+                    Anchor anchor_under = session.createAnchor(height_pose[1]);
+                    anchorNode_u = new AnchorNode(anchor_under);
+                    anchorNode_u.setParent(arFragment.getArSceneView().getScene());
 
+                    //중심점 찍고 그 주변, 양옆으로 한 1cm정도 떨어진 곳에 노드를 추가하고, 움직이게 할거임!중심점은 표시되겠고,
+                    //그 중심점은 노드리스트에 들어가면 안됨!
                     heightButton.setVisibility(View.GONE);
+                    leftButton.setVisibility(View.VISIBLE);
+                    rightButton.setVisibility(View.VISIBLE);
+                    createAnchorNode_underwidth_left(anchor_under.getPose());
+                    createAnchorNode_underwidth_right(anchor_under.getPose());
                     //위에서 닫고 다시 만든것 (세로 측정 안내 텍스트용으로)
                     Frame frame = arFragment.getArSceneView().getArFrame();
                     Anchor anchor = session.createAnchor(
@@ -658,7 +718,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                         @Override
                         public void onClick(View view) {
                             addedAnchorNode_.setEnabled(false);
-
                         }
                     });
                     addedAnchorNode_.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
@@ -715,25 +774,77 @@ public class CameraguideActivity extends AppCompatActivity implements
                     newPose = oldPose.compose(Pose.makeTranslation(0, -0.01f, 0));
                     break;
             }
-            selectedAnchorNode = moveRenderable(selectedAnchorNode, newPose);
+            selectedAnchorNode = moveRenderable(selectedAnchorNode, newPose, "h");
+        }
+    }
+    //밑면 너비 왼쪽 앵커 생성 함수
+    public void createAnchorNode_underwidth_right(Pose standardanchor) {
+        if (numberOfAnchors < MAX_ANCHORS) {
+            //중심점은 2번인덱스, 0과 1은 윗면!!
+            //중심이랑 y ,z 같고 x만 다르게 할거임
+            Pose newpose = standardanchor.compose(Pose.makeTranslation(0.05f, 0, 0));
+            Session session = arFragment.getArSceneView().getSession();
+            Anchor anchor = session.createAnchor(newpose);
+            AnchorNode anchorNode = new AnchorNode(anchor);
+            anchorNode.setParent(arFragment.getArSceneView().getScene());
+            anchorNode.setRenderable(under_sphere);
+            anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+            anchorNodeList.add(1,anchorNode);
+            numberOfAnchors++;
+            //이후 한번 더 누르면 이 앵커를 이동시켜야하기때문에 이 노드를 선택시킴
+            selectedAnchorNode_right = anchorNode;
+        } else {
+            Anchor currentAnchor = selectedAnchorNode_right.getAnchor();
+            Pose oldPose = currentAnchor.getPose();
+            Pose newPose = oldPose.compose(Pose.makeTranslation(0.01f, 0, 0));
+            selectedAnchorNode_right = moveRenderable(selectedAnchorNode_right, newPose, "u_r");
+        }
+    }
+    //밑면 너비 오른쪽 앵커 함수
+    public void createAnchorNode_underwidth_left(Pose standardanchor) {
+        if (numberOfAnchors < MAX_ANCHORS) {
+            //중심점은 2번인덱스, 0과 1은 윗면!!
+            //중심이랑 y ,z 같고 x만 다르게 할거임
+            Pose newpose1 = standardanchor.compose(Pose.makeTranslation(-0.05f, 0, 0));
+            Session session = arFragment.getArSceneView().getSession();
+            Anchor anchor1 = session.createAnchor(newpose1);
+            AnchorNode anchorNode1 = new AnchorNode(anchor1);
+            anchorNode1.setParent(arFragment.getArSceneView().getScene());
+            anchorNode1.setRenderable(under_sphere);
+            anchorNode1.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+            anchorNodeList.add(0,anchorNode1);
+            numberOfAnchors++;
+            //이후 한번 더 누르면 이 앵커를 이동시켜야하기때문에 이 노드를 선택시킴
+            selectedAnchorNode_left = anchorNode1;
+
+        } else {
+            //노드가 2개 생성된 상태에서 한번 더 누르게 되면, 그 노드를 위로 이동시킴
+            Anchor currentAnchor = selectedAnchorNode_left.getAnchor();
+            //높이노드 생성시와 마찬가지로, 포즈를 가져와서 y를 이동시킨 pose를 만들어줌 - 원기둥만 위로 올라가야함
+            Pose oldPose = currentAnchor.getPose();
+            Pose newPose = oldPose.compose(Pose.makeTranslation(-0.01f, 0, 0));
+            selectedAnchorNode_left = moveRenderable(selectedAnchorNode_left, newPose, "u_l");
         }
     }
     //높이 미세조절하도록 앵커 옮겨주는 함수
-    private AnchorNode moveRenderable(AnchorNode anchorNodeToMove, Pose newPoseToMoveTo) {
+    private AnchorNode moveRenderable(AnchorNode anchorNodeToMove, Pose newPoseToMoveTo, String mode) {
         //지우고 다시 생성해서 리턴해줌
         arFragment.getArSceneView().getScene().removeChild(anchorNodeToMove);
         anchorNodeList.remove(anchorNodeToMove);
         Session session = arFragment.getArSceneView().getSession();
         Anchor anchor = session.createAnchor(newPoseToMoveTo.extractTranslation());
         AnchorNode newanchorNode = new AnchorNode(anchor);
-        newanchorNode.setRenderable(sphere);
+        if (mode.equals("u_l")||mode.equals("u_r")) newanchorNode.setRenderable(under_sphere);
+        else newanchorNode.setRenderable(sphere);
         newanchorNode.setParent(arFragment.getArSceneView().getScene());
         newanchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
-        anchorNodeList.add(newanchorNode);
+        if (mode.equals("u_l"))  anchorNodeList.add(0,newanchorNode);
+        else if (mode.equals("u_r"))  anchorNodeList.add(1,newanchorNode);
+        else anchorNodeList.add(newanchorNode);
 
         return newanchorNode;
     }
-    //가이드 시작하는 함수 !!이 함수 원뿔대는 쓰지 않을것!!
+    //가이드 시작하는 함수
     private void start_guide(String cupname, double cup_width, double cup_height, Pose[] width_pose, Pose[] height_pose){
         //원을 만든 후에는 특정 높이만큼을 올려서 앵커들 복사하고 복사한 애들끼리 연결해주면 되는데, 그렇다면 height pose는 쓸모가 없는가?
         //첫 포즈를 기준으로 y축 중심 10도 회전한 pose를 생성 => 그냥 앵커 고개를 회전시킴 안됌
@@ -788,8 +899,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
                 //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
                 //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
-                make_polygon(anchornodes, midPosition, "circle");
-                make_polygon(anchornodes, height_pose[1], "side");
+                make_polygon(anchornodes, null,midPosition, "circle");
+                make_polygon(anchornodes,null, height_pose[1], "side");
                 //얘는 높이에 따라서 원들의 y값을 바꿔줘야 할듯..?
                 break;
             case "paper":
@@ -827,8 +938,10 @@ public class CameraguideActivity extends AppCompatActivity implements
                 anchornodes_under[13] = new AnchorNode(anchors_under[13]);
                 place(anchornodes_under[13], "r");
                 //</editor-fold desc="밑면 원 만들어주는 과정">
-                make_polygon(anchornodes, midPosition, "circle");
-                make_polygon(anchornodes_under, midPosition_under, "circle");
+                make_polygon(anchornodes,null, midPosition, "circle");
+                make_polygon(anchornodes_under,null, midPosition_under, "circle");
+                AnchorNode[][] anchorNodesArray = {anchornodes,anchornodes_under};
+                make_polygon(null, anchorNodesArray, midPosition_under, "square");
             default:
                 break;
         }
@@ -911,14 +1024,14 @@ public class CameraguideActivity extends AppCompatActivity implements
                         });
     }
     //원을 그려줄 함수
-    private void make_polygon(AnchorNode[] anchorNodes, Pose pos, String polygon){
+    private void make_polygon(AnchorNode[] anchorNodes,AnchorNode[][] anchorNodes_, Pose pos, String polygon){
         Log.i("info","폴리곤 함수");
         Toast.makeText(this, "폴리곤 함수", Toast.LENGTH_SHORT).show();
          Session session = arFragment.getArSceneView().getSession();
-         Anchor anchor_pos = session.createAnchor(pos);
-         AnchorNode anchornode_pos = new AnchorNode(anchor_pos);
-         anchornode_pos.setParent(arFragment.getArSceneView().getScene());
          if(polygon.equals("circle") || polygon.equals("side")){
+             Anchor anchor_pos = session.createAnchor(pos);
+             AnchorNode anchornode_pos = new AnchorNode(anchor_pos);
+             anchornode_pos.setParent(arFragment.getArSceneView().getScene());
              //인덱스가 이상해서 .. ㅜ
              for (int i = 0; i<3; i++){
                  if (i/2==1){
@@ -941,6 +1054,67 @@ public class CameraguideActivity extends AppCompatActivity implements
                  anchorsList.add(anchorNodes[i]);
                  anchorsList.add(anchorNodes[i+2]);
                  anchorsList.add(anchornode_pos);
+                 make_mash(anchorsList);
+             }
+         }
+         else if(polygon.equals("square")){
+             //AnchorNode[][] anchorNodes_
+             for (int i = 0; i<2; i++){
+                 List<AnchorNode> anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][i]);
+                 anchorsList.add(anchorNodes_[0][(2*i)+1]);
+                 anchorsList.add(anchorNodes_[1][i]);
+                 make_mash(anchorsList);
+                 anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][i]);
+                 anchorsList.add(anchorNodes_[1][Math.abs((2*i)-2)]);
+                 anchorsList.add(anchorNodes_[1][i]);
+                 make_mash(anchorsList);
+             }
+             for(int i = 1;i<6; i++){
+                 List<AnchorNode> anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][(2*i)+1]);
+                 anchorsList.add(anchorNodes_[0][(2*i)+3]);
+                 anchorsList.add(anchorNodes_[1][(2*i)+1]);
+                 make_mash(anchorsList);
+                 anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][(2*i)+1]);
+                 anchorsList.add(anchorNodes_[1][(2*i)-1]);
+                 anchorsList.add(anchorNodes_[1][(2*i)+1]);
+                 make_mash(anchorsList);
+             }
+             List<AnchorNode> anchorsList = new ArrayList<>();
+             anchorsList.add(anchorNodes_[0][13]);
+             anchorsList.add(anchorNodes_[0][12]);
+             anchorsList.add(anchorNodes_[1][13]);
+             make_mash(anchorsList);
+             anchorsList = new ArrayList<>();
+             anchorsList.add(anchorNodes_[0][13]);
+             anchorsList.add(anchorNodes_[1][11]);
+             anchorsList.add(anchorNodes_[1][13]);
+             make_mash(anchorsList);
+             anchorsList = new ArrayList<>();
+             anchorsList.add(anchorNodes_[0][12]);
+             anchorsList.add(anchorNodes_[0][10]);
+             anchorsList.add(anchorNodes_[1][12]);
+             make_mash(anchorsList);
+             anchorsList = new ArrayList<>();
+             anchorsList.add(anchorNodes_[0][12]);
+             anchorsList.add(anchorNodes_[1][13]);
+             anchorsList.add(anchorNodes_[1][12]);
+             make_mash(anchorsList);
+
+
+             for(int i = 10;i > 1; i=i-2){
+                 anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][i]);
+                 anchorsList.add(anchorNodes_[0][Math.abs(2-i)]);
+                 anchorsList.add(anchorNodes_[1][i]);
+                 make_mash(anchorsList);
+                 anchorsList = new ArrayList<>();
+                 anchorsList.add(anchorNodes_[0][i]);
+                 anchorsList.add(anchorNodes_[1][2+i]);
+                 anchorsList.add(anchorNodes_[1][i]);
                  make_mash(anchorsList);
              }
          }
