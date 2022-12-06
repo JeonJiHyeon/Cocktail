@@ -97,7 +97,8 @@
                 android:layout_height="100dp"
                 android:layout_marginStart="40dp"
                 android:layout_marginBottom="56dp"
-                android:text="Button"
+                android:text="취향_데이터1"
+                android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button2"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -108,7 +109,8 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginBottom="56dp"
-                android:text="Button"
+                android:text="취향_데이터2"
+                android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -119,7 +121,8 @@
                 android:layout_height="100dp"
                 android:layout_marginEnd="40dp"
                 android:layout_marginBottom="56dp"
-                android:text="Button"
+                android:text="취향_데이터3"
+                android:textSize="10sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -131,7 +134,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="40dp"
                 android:layout_marginBottom="4dp"
-                android:text="Button"
+                android:text="아니요"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -141,7 +144,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
                 android:layout_marginBottom="4dp"
-                android:text="Button"
+                android:text="네"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
