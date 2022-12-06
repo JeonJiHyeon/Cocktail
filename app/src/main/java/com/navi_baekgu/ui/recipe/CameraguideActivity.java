@@ -726,6 +726,25 @@ public class CameraguideActivity extends AppCompatActivity implements
     private double calculateVolume(double radius, double height) {
         return Math.pow(radius,2) * Math.PI * height;
     }
+    //계량 높이 구해주는 함수 - 원기둥
+    private double calculateHeight_cylinder(double amount, double radius) {
+        return amount / Math.pow(radius,2) * Math.PI;
+    }
+    //계량 높이 구해주는 함수 - 원뿔
+    private double calculateHeight_cone(double amount, double radius, double height) {
+        return Math.pow((3 * Math.pow(height,2) * amount / (Math.PI * Math.pow(radius,2))), 1.0 / 3.0);
+    }
+    //계량 높이 구해주는 함수 - 원뿔대
+    private double calculateHeight_truncated(double amount, double bottom_radius, double top_radius, double height) {
+        double a = (Math.pow(top_radius, 2) * Math.PI) / (3 * Math.pow(height, 2));
+        double b = (top_radius * bottom_radius * Math.PI) / (3 * height);
+        double c = (Math.pow(bottom_radius, 2) * Math.PI) / 3;
+        double d = -1 * amount;
+        double e = 2 * Math.pow(b, 3) - 9 * a * b * c + 27 * Math.pow(a, 2) * d;
+        double f = Math.pow(Math.pow(e, 2) - 4 * Math.pow(Math.pow(b, 2) - 3 * a * c, 3), 1.0 / 2.0);
+        return -1 * (b / (3 * a)) - (1 / (3 * a)) * Math.pow((e + f) / 2, 1.0 / 3.0)
+                - (1 / (3 * a)) * Math.pow((e - f) / 2, 1.0 / 3.0);
+    }
     //원 그려주는 함수.
     private void make_cylinder(double radius,float height, Pose mid, Pose width){
         Color color2 = new Color(255, 140, 50, 0.35f);
