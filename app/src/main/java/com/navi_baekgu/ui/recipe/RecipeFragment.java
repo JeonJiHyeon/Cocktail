@@ -22,68 +22,68 @@ public class RecipeFragment extends Fragment {
         binding.Gin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Gin");
+                changeActivity("진");
             }
         });
         binding.Vodka.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Vodka");
+                changeActivity("보드카");
             }
         });
         binding.Rum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Rum");
+                changeActivity("럼");
             }
         });
         binding.Tequila.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Tequila");
+                changeActivity("데킬라");
             }
         });
         binding.Whiskey.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Whiskey");
+                changeActivity("위스키");
             }
         });
         binding.Brandy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Brandy");
+                changeActivity("브랜디");
             }
         });
         binding.Liqueur.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Liqueur");
+                changeActivity("리큐르");
             }
         });
         binding.Wine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Wine");
+                changeActivity("와인");
             }
         });
         binding.Beer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Beer");
+                changeActivity("맥주");
             }
         });
         binding.Soju.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Soju");
+                changeActivity("소주");
             }
         });
 
         binding.Non.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("Non");
+                changeActivity("논알콜");
             }
         });
         binding.AllRecipe.setOnClickListener(new View.OnClickListener() {
