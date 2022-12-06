@@ -1,15 +1,22 @@
 package com.navi_baekgu.ui.recipe;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.navi_baekgu.R;
 import com.navi_baekgu.databinding.ActivityDetailBinding;
 import com.navi_baekgu.ui.recycler.Cocktail;
 
@@ -20,6 +27,10 @@ public class DetailActivity extends AppCompatActivity {
     private ArrayList<ArrayList<String>> recipe;
     private String ingredient_string = "";
     private String recipe_string = "";
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
+    private ImageView cocktailImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +38,17 @@ public class DetailActivity extends AppCompatActivity {
         Cocktail selected_cocktail = (Cocktail) intent.getSerializableExtra("selected_cocktail"); // 직렬화된 객체를 받는 방법
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         binding.cocktailName.setText(selected_cocktail.getName());
-        //이미지 바꾸는 부분을 추가해야함
+        //이미지 바꾸는 부분
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+        StorageReference pathReference = storageReference.child(selected_cocktail.getId() + ".jpeg");
+        pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                cocktailImage = findViewById(R.id.cocktail_image);
+                Glide.with(DetailActivity.this).load(uri).into(cocktailImage);
+            }
+        });
         ViewGroup.LayoutParams params = binding.detailLl.getLayoutParams();
         recipe = selected_cocktail.getRecipe();
         for(int i = 0; i<recipe.size(); i++){

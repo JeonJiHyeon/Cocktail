@@ -77,14 +77,14 @@ public class CocktaillistActivity extends AppCompatActivity {
                                                     Rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
 
                                                     // 리사이클러뷰에 SimpleTextAdapter 객체 지정. 이부분에 따라 추가됨 지금은 2개 추
-                                                    CocktailAdapter adapter = new CocktailAdapter(cocktails);
+                                                    CocktailAdapter adapter = new CocktailAdapter(cocktails, getApplicationContext());
                                                     Rv.setAdapter(adapter);
                                                 } else {
                                                     Log.w(TAG, "Error getting documents.", task.getException());
                                                 }
                                             }
                                         });
-                                Cocktail cocktail = new Cocktail(document.getString("id"), document.getString("name"), document.getString("base"), recipe);
+                                Cocktail cocktail = new Cocktail(document.getId(), document.getString("name"), document.getString("base"), recipe);
                                 cocktails.add(cocktail);
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
