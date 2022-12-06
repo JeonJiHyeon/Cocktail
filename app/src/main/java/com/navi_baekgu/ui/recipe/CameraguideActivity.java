@@ -220,7 +220,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                     renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
                             addedAnchorNode.setEnabled(false);
                         }
                     });
@@ -280,7 +279,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                     renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
                             addedAnchorNode.setEnabled(false);
                         }
                     });
@@ -341,7 +339,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                     renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
                             addedAnchorNode.setEnabled(false);
                         }
                     });
@@ -545,7 +542,6 @@ public class CameraguideActivity extends AppCompatActivity implements
             anchorNodeList.add(anchorNode);
             numberOfAnchors++;
             if (numberOfAnchors == MAX_ANCHORS && width_pose==null&&height_pose==null) {   // 두 번째 노드를 찍으면... 바로 너비 계산
-                Toast.makeText(this, "Calc distance for width", Toast.LENGTH_SHORT).show();
                 Calc_distance("w"); // 너비 계산 -> 세로 노드 찍기로 자동 넘어감
             }
 
@@ -558,12 +554,10 @@ public class CameraguideActivity extends AppCompatActivity implements
             }
 
             if(height_pose==null&&width_pose[0]!=null){
-                Toast.makeText(this, "Calc distance for height", Toast.LENGTH_SHORT).show();
                 Calc_distance("h"); // 높이 계산
                 Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
             }
             else if (numberOfAnchors == MAX_ANCHORS && width_pose!=null&&height_pose!=null&&width_pose_under==null&&cupname.equals("paper")) {
-                Toast.makeText(this, "Calc distance for under width", Toast.LENGTH_SHORT).show();
                 Calc_distance("w_under");
             }else {
                 Toast.makeText(this, "측정이 끝났습니다. 완료 버튼을 눌러주세요", Toast.LENGTH_SHORT).show();
@@ -646,7 +640,6 @@ public class CameraguideActivity extends AppCompatActivity implements
         renderable_ui_result.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Clicked_close_btn", Toast.LENGTH_SHORT).show();
 
                 resultanchor.setEnabled(false);
 
@@ -901,8 +894,6 @@ public class CameraguideActivity extends AppCompatActivity implements
                 make_cylinder(radius, height, midPosition,width_pose[0]);
                 break;
             case "cocktail":
-                Log.i("info","가이드");
-                Toast.makeText(this, "가이드 시작함", Toast.LENGTH_SHORT).show();
                 //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
                 //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
                 //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
@@ -1053,8 +1044,6 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     //원을 그려줄 함수
     private void make_polygon(AnchorNode[] anchorNodes,AnchorNode[][] anchorNodes_, Pose pos, String polygon){
-        Log.i("info","폴리곤 함수");
-        Toast.makeText(this, "폴리곤 함수", Toast.LENGTH_SHORT).show();
          Session session = arFragment.getArSceneView().getSession();
          if(polygon.equals("circle") || polygon.equals("side")){
              Anchor anchor_pos = session.createAnchor(pos);
@@ -1151,8 +1140,6 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     //매쉬 만들어주는 함수
     private void make_mash(List<AnchorNode> anchorsList){
-        Log.i("info","매쉬");
-        Toast.makeText(this, "매쉬", Toast.LENGTH_SHORT).show();
         if (anchorsList.size() == 3) {
             Color color2 = new Color(255, 0, 0, 0.5f);
             MaterialFactory.makeTransparentWithColor(this, color2)
@@ -1165,8 +1152,6 @@ public class CameraguideActivity extends AppCompatActivity implements
         }
     }
     private ModelRenderable makeTriangleWithAnchors(@NonNull final List<AnchorNode> anchorNodes, @NonNull final Material material) {
-        Log.i("info","삼각형");
-        Toast.makeText(this, "삼각형", Toast.LENGTH_SHORT).show();
         if (anchorNodes.size() != 3) throw new IllegalStateException("Different count of anchorsList than 3");
 
         final Vector3 p0 = anchorNodes.get(0).getLocalPosition();
