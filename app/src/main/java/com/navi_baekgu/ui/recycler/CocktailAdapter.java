@@ -2,17 +2,23 @@ package com.navi_baekgu.ui.recycler;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.navi_baekgu.R;
 import com.navi_baekgu.databinding.LayoutCardviewBinding;
 import com.navi_baekgu.ui.recipe.CocktaillistActivity;
@@ -27,17 +33,22 @@ import java.util.List;
 
 public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHolder> {
     ArrayList<Cocktail> mdatas;
+    private Context context;
 
-    public CocktailAdapter(ArrayList<Cocktail> datas) {
+    public CocktailAdapter(ArrayList<Cocktail> datas, Context context) {
         this.mdatas = datas;
+        this.context = context;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView cocktailName, cocktailBase;
-        ViewHolder(View itemView){
+        ImageView cocktailImage;
+
+        public ViewHolder(View itemView){
             super(itemView);
             cocktailName = itemView.findViewById(R.id.cardname);
             cocktailBase = itemView.findViewById(R.id.cardbase);
+            cocktailImage = itemView.findViewById(R.id.cocktail_image);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -49,6 +60,19 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                         v.getContext().startActivity(intent);
 
                     }
+                }
+            });
+        }
+        public void setItem(Context context, Cocktail item) {
+            FirebaseStorage storage;
+            StorageReference storageReference;
+            storage = FirebaseStorage.getInstance();
+            storageReference = storage.getReference();
+            StorageReference pathReference = storageReference.child(item.getId() + ".jpeg");
+            pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Glide.with(context).load(uri).into(cocktailImage);
                 }
             });
         }
@@ -72,6 +96,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.cocktailName.setText(mdatas.get(position).getName());
         holder.cocktailBase.setText(mdatas.get(position).getBase());
+        holder.setItem(context, mdatas.get(position));
     }
 
     @Override
