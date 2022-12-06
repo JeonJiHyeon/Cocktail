@@ -1,48 +1,50 @@
 package com.navi_baekgu.ui.recycler;
 
+import java.util.ArrayList;
+
 public class Cocktail {
-    int resourceId;
-    String CockTail_name;
-    String CockTail_recipe;
-    String CockTail_tag;
+    String id;
+    String name;
+    String base;
+    ArrayList<ArrayList<String>> recipe;
 
-    public Cocktail(int resourceId, String name, String recipe, String tag) {
-        this.resourceId = resourceId;
-        this.CockTail_name = name;
-        this.CockTail_recipe = recipe;
-        this.CockTail_tag = tag;
+    public Cocktail(String id, String name, String base, ArrayList<ArrayList<String>> recipe) {
+        this.id = id;
+        this.name = name;
+        this.base = base;
+        this.recipe = recipe;
     }
 
-    public int getresourceId() {
-        return resourceId;
+    public String getId() {
+        return id;
     }
 
-    public void setresourceId(int resourceId) {
-        this.resourceId = resourceId;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getname() {
-        return CockTail_name;
+    public String getName() {
+        return name;
     }
 
-    public void setname(String name) {
-        this.CockTail_name = name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getrecipe() {
-        return CockTail_recipe;
+    public String getBase() {
+        return base;
     }
 
-    public void setrecipe(String recipe) {
-        this.CockTail_recipe = recipe;
+    public void setBase(String base) {
+        this.base = base;
     }
 
-    public String gettag() {
-        return CockTail_tag;
+    public ArrayList<ArrayList<String>> getRecipe() {
+        return recipe;
     }
 
-    public void settag(String tag) {
-        this.CockTail_tag = tag;
+    public void setRecipe(ArrayList<ArrayList<String>> recipe) {
+        this.recipe = recipe;
     }
 
 }
