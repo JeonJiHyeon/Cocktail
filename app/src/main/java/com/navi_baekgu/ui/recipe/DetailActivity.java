@@ -2,7 +2,11 @@ package com.navi_baekgu.ui.recipe;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,15 +26,22 @@ public class DetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Cocktail selected_cocktail = (Cocktail) intent.getSerializableExtra("selected_cocktail"); // 직렬화된 객체를 받는 방법
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
         binding.cocktailName.setText(selected_cocktail.getName());
         //이미지 바꾸는 부분을 추가해야함
-
+        ViewGroup.LayoutParams params = binding.detailLl.getLayoutParams();
         recipe = selected_cocktail.getRecipe();
         for(int i = 0; i<recipe.size(); i++){
-            ingredient_string = ingredient_string + recipe.get(i).get(1) + ",\n";
+            if (recipe.get(i).get(1).length()>0){
+                ingredient_string = ingredient_string + recipe.get(i).get(1) + ",\n";
+            }
             recipe_string = recipe_string + (i+1+". ") + recipe.get(i).get(4) + "\n";
+            if (i>6){
+                params.height = params.height + 20;
+                Log.i("info", ""+params.height);
+                binding.detailLl.setLayoutParams(params);
+            }
         }
+        setContentView(binding.getRoot());
         ingredient_string  = ingredient_string .substring(0, ingredient_string .length() - 2);
         binding.cocktailIngredients.setText(ingredient_string);
         binding.cocktailRecipe.setText(recipe_string);
