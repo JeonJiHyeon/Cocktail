@@ -419,7 +419,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     cancel_btn.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
-                    anchorNode_u.setEnabled(false);
+                    if (anchorNode_u!=null){anchorNode_u.setEnabled(false);}
                     while (numberOfAnchors!=0) {
                         deleteButton.performClick();
                     }

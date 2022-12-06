@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -40,8 +41,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="145dp"
             android:clickable="false"
-            android:drawableBottom="@drawable/wine_glass"
-            android:text="와인잔"
+            android:drawableBottom="@drawable/paper_cup"
+            android:text="종이컵"
             android:textSize="16sp" />
 
         <Button
@@ -69,6 +70,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="60dp"
+            android:tint="@android:color/white"
+            app:tint="@android:color/white"
             android:src="@drawable/left"
             android:visibility="gone" />
 
@@ -78,6 +81,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="90dp"
             android:layout_marginTop="60dp"
+            android:tint="@android:color/white"
+            app:tint="@android:color/white"
             android:src="@drawable/right"
             android:visibility="gone" />
 
@@ -88,6 +93,8 @@
             android:layout_marginStart="90dp"
             android:layout_marginTop="60dp"
             android:src="@drawable/ic_height"
+            android:tint="@android:color/white"
+            app:tint="@android:color/white"
             android:visibility="gone" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -97,6 +104,8 @@
             android:layout_marginStart="170dp"
             android:layout_marginTop="60dp"
             android:src="@drawable/ic_delete"
+            app:tint="@android:color/white"
+            android:tint="@android:color/white"
             android:visibility="gone" />
 
 
