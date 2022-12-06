@@ -3,14 +3,11 @@ package com.navi_baekgu.ui.recycler;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,15 +17,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.navi_baekgu.R;
-import com.navi_baekgu.databinding.LayoutCardviewBinding;
-import com.navi_baekgu.ui.recipe.CocktaillistActivity;
 import com.navi_baekgu.ui.recipe.DetailActivity;
-//import com.navi_baekgu.ui.recipe.CocktaillistViewModel;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHolder> {
@@ -40,11 +31,11 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
         this.context = context;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         TextView cocktailName, cocktailBase;
         ImageView cocktailImage;
 
-        public ViewHolder(View itemView){
+        public ViewHolder(View itemView) {
             super(itemView);
             cocktailName = itemView.findViewById(R.id.cardname);
             cocktailBase = itemView.findViewById(R.id.cardbase);
@@ -53,7 +44,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     int position_info = getAdapterPosition();
-                    if(position_info != RecyclerView.NO_POSITION){
+                    if (position_info != RecyclerView.NO_POSITION) {
                         Intent intent = new Intent(v.getContext(), DetailActivity.class);
                         intent.putExtra("selected_cocktail", mdatas.get(position_info));
                         v.getContext().startActivity(intent);
@@ -62,6 +53,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                 }
             });
         }
+
         public void setItem(Context context, Cocktail item) {
             FirebaseStorage storage;
             StorageReference storageReference;
@@ -81,11 +73,11 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
     @Override
     //	viewType 형태의 아이템 뷰를 위한 뷰홀더 객체 생성.
     public CocktailAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext() ;
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) ;
+        Context context = parent.getContext();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View view = inflater.inflate(R.layout.layout_cardview, parent, false) ;
-        CocktailAdapter.ViewHolder viewHolder = new CocktailAdapter.ViewHolder(view) ;
+        View view = inflater.inflate(R.layout.layout_cardview, parent, false);
+        CocktailAdapter.ViewHolder viewHolder = new CocktailAdapter.ViewHolder(view);
 
         return viewHolder;
     }
@@ -106,7 +98,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
     @Override
     //	전체 아이템 갯수 리턴.
     public int getItemCount() {
-        return mdatas.size() ;
+        return mdatas.size();
     }
 
 }

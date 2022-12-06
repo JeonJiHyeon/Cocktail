@@ -2,6 +2,7 @@ package com.navi_baekgu.ui.recycler;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
 //인텐트로 보내주려면 직렬화해야해서 관련된 것들을 상속시킴
 public class Cocktail implements Serializable {
     String id;

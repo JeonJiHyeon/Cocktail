@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-<!--    <data>-->
+    <!--    <data>-->
 
-<!--        <variable-->
-<!--            name="viewmodel"-->
-<!--            type="com.navi_baekgu.ui.recipe.CocktaillistViewModel" />-->
-<!--    </data>-->
+    <!--        <variable-->
+    <!--            name="viewmodel"-->
+    <!--            type="com.navi_baekgu.ui.recipe.CocktaillistViewModel" />-->
+    <!--    </data>-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,16 +15,15 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/cocktail_lv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/cocktail_lv">
-        </androidx.recyclerview.widget.RecyclerView>
+            android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
-<!--        <ListView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            -->
-<!--            tools:listitem="@layout/layout_cardview"/>-->
+        <!--        <ListView-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            -->
+        <!--            tools:listitem="@layout/layout_cardview"/>-->
     </LinearLayout>
 
 </layout>
