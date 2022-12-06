@@ -45,6 +45,7 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                     if(position_info != RecyclerView.NO_POSITION){
                         Toast.makeText(v.getContext(), position_info + 1 + "번째 칵테일을 골랐음", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(v.getContext(), DetailActivity.class);
+                        intent.putExtra("selected_cocktail", mdatas.get(position_info));
                         v.getContext().startActivity(intent);
 
                     }

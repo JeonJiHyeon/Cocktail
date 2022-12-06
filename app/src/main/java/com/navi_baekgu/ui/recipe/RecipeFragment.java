@@ -19,11 +19,77 @@ public class RecipeFragment extends Fragment {
 
         binding = FragmentRecipeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        binding.RecipeButton1.setOnClickListener(new View.OnClickListener() {
+        binding.Gin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                changeActivity("ALL");
+                changeActivity("Gin");
+            }
+        });
+        binding.Vodka.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Vodka");
+            }
+        });
+        binding.Rum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Rum");
+            }
+        });
+        binding.Tequila.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Tequila");
+            }
+        });
+        binding.Whiskey.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Whiskey");
+            }
+        });
+        binding.Brandy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Brandy");
+            }
+        });
+        binding.Liqueur.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Liqueur");
+            }
+        });
+        binding.Wine.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Wine");
+            }
+        });
+        binding.Beer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Beer");
+            }
+        });
+        binding.Soju.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Soju");
+            }
+        });
+
+        binding.Non.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("Non");
+            }
+        });
+        binding.AllRecipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeActivity("All");
             }
         });
         return root;

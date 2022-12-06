@@ -38,17 +38,21 @@ public class CocktaillistActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cocktaillist);
+        Intent intent = getIntent();
+        String Base = (String) intent.getSerializableExtra("subject"); // 직렬화된 객체를 받는 방법
         Rv = findViewById(R.id.cocktail_lv);
-        getCocktailList();
+        getCocktailList(Base);
 
     }
 
-    public void getCocktailList() {
+    public void getCocktailList(String Base) {
         db.collection("cocktails")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        //getCocktailList 여기 매개변수로 Base 받은곳에 사용자가 선택한 버튼(진 버튼이면 진, 럼이면 럼, 보드카면 보드카)이뭔지 알수있음
+                        //all은 전부 띄워야하구 나머지는 그에 맞는 칵테일만 띄워주면됨!!
                         if (task.isSuccessful()) {
                             ArrayList<Cocktail> cocktails = new ArrayList<Cocktail>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
@@ -74,7 +78,6 @@ public class CocktaillistActivity extends AppCompatActivity {
 
                                                     // 리사이클러뷰에 SimpleTextAdapter 객체 지정. 이부분에 따라 추가됨 지금은 2개 추
                                                     CocktailAdapter adapter = new CocktailAdapter(cocktails);
-                                                    Log.d(TAG,  "로그"+cocktails.get(0).getId()+cocktails.get(0).getRecipe().get(0));
                                                     Rv.setAdapter(adapter);
                                                 } else {
                                                     Log.w(TAG, "Error getting documents.", task.getException());

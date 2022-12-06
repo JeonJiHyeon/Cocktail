@@ -4,6 +4,7 @@ import static com.google.ar.sceneform.rendering.HeadlessEngineWrapper.TAG;
 
 import java.lang.Math;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -47,6 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.google.ar.sceneform.ux.ArFragment;
+import com.navi_baekgu.ui.recycler.Cocktail;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -84,6 +86,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Button result_;
     private String cupname;
     private boolean cancle;
+    private  Cocktail selected_cocktail;
 
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
@@ -99,6 +102,8 @@ public class CameraguideActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cameraguide);
+        Intent intent = getIntent();
+        selected_cocktail = (Cocktail) intent.getSerializableExtra("selected_cocktail"); // 직렬화된 객체를 받는 방법
         new SweetAlertDialog(CameraguideActivity.this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("카메라 가이드에 온 것을 환영합니다.")
                 .setContentText("먼저 컵의 모양을 선택한 후, 가이드에 따라 컵을 측정하고 레시피를 안내받으세요!")
@@ -890,6 +895,8 @@ public class CameraguideActivity extends AppCompatActivity implements
         switch (cupname){
             case "mug":
                 //가이드 진행에 맞게 height 맞춰서 make실린더도 변수를 바꿔가며 실행시키면 된다.
+                //선택된 칵테일 여기서 불러와서 쓰면 됨. selected_cocktail
+
                 height = 0.03f;
                 make_cylinder(radius, height, midPosition,width_pose[0]);
                 break;
