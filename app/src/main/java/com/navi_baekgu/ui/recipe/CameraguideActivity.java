@@ -39,10 +39,12 @@ import com.navi_baekgu.R;
 import com.navi_baekgu.ui.recycler.Cocktail;
 
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -59,6 +61,8 @@ public class CameraguideActivity extends AppCompatActivity implements
     //지금 몇개의 앵커가 있는지 저장할 변수
     private Integer numberOfAnchors = 0;
     private Integer create_mode = 0;
+    private int count;
+    private double total;
     //길이정보 저장해줄 변수
     private double cup_height;
     private double cup_width, cup_width_under;
@@ -83,6 +87,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private String cupname;
     private boolean cancle;
     private Cocktail selected_cocktail;
+    private int recipe_count = 0;
 
     private ArFragment arFragment;
     //컬러와 렌더러블<3D model and consists of vertices, materials, textures, and more.> 생성
@@ -101,6 +106,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_cameraguide);
         Intent intent = getIntent();
         selected_cocktail = (Cocktail) intent.getSerializableExtra("selected_cocktail"); // 직렬화된 객체를 받는 방법
+        recipe_count = selected_cocktail.getRecipe().size();
         new SweetAlertDialog(CameraguideActivity.this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("카메라 가이드에 온 것을 환영합니다.")
                 .setContentText("먼저 컵의 모양을 선택한 후, 가이드에 따라 컵을 측정하고 레시피를 안내받으세요!")
@@ -534,7 +540,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             anchorNode.setRenderable(sphere); //아까 만든 구
 
             //노드가 너무 크면 의도치않은 오차 및 보기가 힘들어서 줄여버림
-            anchorNode.setLocalScale(new Vector3(0.6f, 0.6f, 0.6f));
+            anchorNode.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
 
             anchorNodeList.add(anchorNode);
             numberOfAnchors++;
@@ -854,17 +860,197 @@ public class CameraguideActivity extends AppCompatActivity implements
         //인자로 넘어온 radius 값은 cm단위고 오픈gl은 m단위체계이므로 100을 나눠주도록 한다.
         //<editor-fold desc="원 만들어주는 과정">
         double radius = (cup_width / 2) / 100;
+        double[] r_volume = new double[recipe_count+1];
+        double[] height = new double[recipe_count+1];
+        double[] total_volume = new double[recipe_count+2];
+        double[] cone_rad = new double[recipe_count+1];
+        total_volume[0] = Integer.parseInt(selected_cocktail.getRecipe().get(0).get(2));
+        for (int i=0; i<recipe_count; i++){
+            r_volume[i] = Integer.parseInt(selected_cocktail.getRecipe().get(i).get(2));
+            total_volume[i+1] = total_volume[i] + r_volume[i];
+            if(cupname.equals("mug")) height[i] = (float) calculateHeight_cylinder(r_volume[i], radius * 100) / 100.f;
+            //(double amount, double radius, double height)
+            else if(cupname.equals("cocktail")) {
+                height[i] = (float) calculateHeight_cone(total_volume[i], radius * 100, cup_height) / 100.f;
+                cone_rad[i] = Double.parseDouble(String.format("%.9f",new BigDecimal(((radius * height[i]) / cup_height))));
+                Log.i("반지름",""+cone_rad[i] );
+            }
+        }
+        //</editor-fold desc="원 만들어주는 과정">
+        count=0; total=0;
+        switch (cupname) {
+            case "mug":
+                //가이드 진행에 맞게 height 맞춰서 make실린더도 변수를 바꿔가며 실행시키면 된다.
+                //선택된 칵테일 여기서 불러와서 쓰면 됨. selected_cocktail
+                Pose midPosition = width_pose[2];
 
-        Pose midPosition = width_pose[2];
+                //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
+                float[] x_positions = new float[8];
+                x_positions[0] = width_pose[0].tx();
+                x_positions[7] = width_pose[1].tx();
 
+                float[] z_positions = calc_position(radius, midPosition, x_positions);
+
+                Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, 0);
+
+                pose_list[0] = width_pose[0];
+                pose_list[13] = width_pose[1];
+
+                Session session = arFragment.getArSceneView().getSession();
+                Anchor[] anchors = new Anchor[14];
+                AnchorNode[] anchornodes = new AnchorNode[14];
+
+                //0과 마지막 13번인덱스는 위에서 줬음.
+                for (int i = 1; i < 13; i++) {
+                    anchors[i] = session.createAnchor(pose_list[i]);
+                    anchornodes[i] = new AnchorNode(anchors[i]);
+                    place(anchornodes[i], "");
+                }
+                //0과 마지막 13번째는 빨간색 노드로 표시할거임
+                anchors[0] = session.createAnchor(pose_list[0]);
+                anchornodes[0] = new AnchorNode(anchors[0]);
+                place(anchornodes[0], "r");
+                anchors[13] = session.createAnchor(pose_list[13]);
+                anchornodes[13] = new AnchorNode(anchors[13]);
+                place(anchornodes[13], "r");
+                arFragment.getArSceneView().getPlaneRenderer().setEnabled(false);
+                iterative_guide(count, radius, midPosition, height);
+
+                break;
+            case "cocktail":
+                //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
+                //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
+                //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
+                iterative_guide_cone(count,radius, cone_rad, width_pose[2], height);
+                //얘는 높이에 따라서 원들의 y값을 바꿔줘야 할듯..?
+                break;
+            case "paper":
+                //아오 함수로 만들걸
+                Pose midPosition3 = width_pose[2];
+
+                //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
+                float[] x_positions3 = new float[8];
+                x_positions3[0] = width_pose[0].tx();
+                x_positions3[7] = width_pose[1].tx();
+
+                float[] z_positions3 = calc_position(radius, midPosition3, x_positions3);
+
+                Pose[] pose_list3 = make_pose(x_positions3, width_pose[0], z_positions3, 0);
+
+                pose_list3[0] = width_pose[0];
+                pose_list3[13] = width_pose[1];
+
+                Session session3 = arFragment.getArSceneView().getSession();
+                Anchor[] anchors3 = new Anchor[14];
+                AnchorNode[] anchornodes3 = new AnchorNode[14];
+
+                //0과 마지막 13번인덱스는 위에서 줬음.
+                for (int i = 1; i < 13; i++) {
+                    anchors3[i] = session3.createAnchor(pose_list3[i]);
+                    anchornodes3[i] = new AnchorNode(anchors3[i]);
+                    place(anchornodes3[i], "");
+                }
+                //0과 마지막 13번째는 빨간색 노드로 표시할거임
+                anchors3[0] = session3.createAnchor(pose_list3[0]);
+                anchornodes3[0] = new AnchorNode(anchors3[0]);
+                place(anchornodes3[0], "r");
+                anchors3[13] = session3.createAnchor(pose_list3[13]);
+                anchornodes3[13] = new AnchorNode(anchors3[13]);
+                place(anchornodes3[13], "r");
+
+                //<editor-fold desc="밑면 원 만들어주는 과정">
+                double radius_under = (cup_width_under / 2) / 100;
+
+                Pose midPosition_under = width_pose_under[2];
+
+                //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
+                float[] x_positions_under = new float[8];
+                x_positions_under[0] = width_pose_under[0].tx();
+                x_positions_under[7] = width_pose_under[1].tx();
+
+                float[] z_positions_under = calc_position(radius_under, midPosition_under, x_positions_under);
+
+                Pose[] pose_list_under = make_pose(x_positions_under, width_pose_under[0], z_positions_under, 0);
+
+                pose_list_under[0] = width_pose_under[0];
+                pose_list_under[13] = width_pose_under[1];
+                Anchor[] anchors_under = new Anchor[14];
+                AnchorNode[] anchornodes_under = new AnchorNode[14];
+
+                //0과 마지막 13번인덱스는 위에서 줬음.
+                for (int i = 1; i < 13; i++) {
+                    anchors_under[i] = session3.createAnchor(pose_list_under[i]);
+                    anchornodes_under[i] = new AnchorNode(anchors_under[i]);
+                    place(anchornodes_under[i], "");
+                }
+                //0과 마지막 13번째는 빨간색 노드로 표시할거임
+                anchors_under[0] = session3.createAnchor(pose_list_under[0]);
+                anchornodes_under[0] = new AnchorNode(anchors_under[0]);
+                place(anchornodes_under[0], "r");
+                anchors_under[13] = session3.createAnchor(pose_list_under[13]);
+                anchornodes_under[13] = new AnchorNode(anchors_under[13]);
+                place(anchornodes_under[13], "r");
+                //</editor-fold desc="밑면 원 만들어주는 과정">
+                make_polygon(anchornodes3, null, midPosition3, "circle", new Color(255, 0, 0));
+                make_polygon(anchornodes_under, null, midPosition_under, "circle", new Color(255, 0, 0));
+                AnchorNode[][] anchorNodesArray = {anchornodes3, anchornodes_under};
+                make_polygon(null, anchorNodesArray, midPosition_under, "square", new Color(255, 0, 0));
+            default:
+                break;
+        }
+    }
+    //재귀적 함수 호출
+    private void iterative_guide(int count_, double radius_, Pose midPosition_, double[] heights){
+        Session session = arFragment.getArSceneView().getSession();
+        Frame frame = arFragment.getArSceneView().getArFrame();
+        Anchor anchor = session.createAnchor(
+                frame.getCamera().getPose()
+                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        .extractTranslation());
+        AnchorNode addedAnchorNode = new AnchorNode(anchor);
+        addedAnchorNode.setEnabled(true);
+        //결과 넣기
+        TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+        String msg = selected_cocktail.getRecipe().get(count_).get(4);
+        text.setText(msg);
+        addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+        addedAnchorNode.setRenderable(renderable_ui_info);
+        addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
+
+
+
+        Random random = new Random();
+        Color color2 = new Color(android.graphics.Color.argb(180,255, random.nextInt(255), 0));
+
+
+
+        if(heights[count_]!=0)make_cylinder(radius_, heights[count_], midPosition_,width_pose[0],(float) total, color2);
+        total = total + heights[count_];
+        renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addedAnchorNode.setEnabled(false);
+                if(count_+1<recipe_count) iterative_guide(count_+1, radius_, midPosition_, heights);
+
+            }
+        });
+
+    }
+    //반지름 목록, 높이 목록 미드포지션으로 들어올 애 : width_pose[2]
+    private void iterative_guide_cone(int count_,double rad, double[] radius_, Pose midPosition_, double[] heights){
         //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
         float[] x_positions = new float[8];
-        x_positions[0] = width_pose[0].tx();
-        x_positions[7] = width_pose[1].tx();
+        Log.i("info", ""+rad);
+        Log.i("info", ""+radius_[0]);
+        if (width_pose[0].tx()<0) x_positions[0] = (float) (width_pose[0].tx() + (rad - radius_[count_]));
+        else x_positions[0] = (float) (width_pose[0].tx() - (rad - radius_[count_]));
+        Log.i("info", ""+x_positions[0]);
+        if (width_pose[1].tx()<0) x_positions[7] = (float) (width_pose[1].tx() + (rad - radius_[count_]));
+        else x_positions[7] = (float) (width_pose[1].tx() - (rad - radius_[count_]));
+        Log.i("info", ""+x_positions[1]);
+        float[] z_positions = calc_position(radius_[count_], midPosition_, x_positions);
 
-        float[] z_positions = calc_position(radius, midPosition, x_positions);
-
-        Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions);
+        Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_]);
 
         pose_list[0] = width_pose[0];
         pose_list[13] = width_pose[1];
@@ -886,68 +1072,40 @@ public class CameraguideActivity extends AppCompatActivity implements
         anchors[13] = session.createAnchor(pose_list[13]);
         anchornodes[13] = new AnchorNode(anchors[13]);
         place(anchornodes[13], "r");
-        //</editor-fold desc="원 만들어주는 과정">
-        float height;
-        switch (cupname) {
-            case "mug":
-                //가이드 진행에 맞게 height 맞춰서 make실린더도 변수를 바꿔가며 실행시키면 된다.
-                //선택된 칵테일 여기서 불러와서 쓰면 됨. selected_cocktail
 
-                height = 0.03f;
-                make_cylinder(radius, height, midPosition, width_pose[0]);
-                break;
-            case "cocktail":
-                //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
-                //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
-                //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
-                make_polygon(anchornodes, null, midPosition, "circle");
-                make_polygon(anchornodes, null, height_pose[1], "side");
-                //얘는 높이에 따라서 원들의 y값을 바꿔줘야 할듯..?
-                break;
-            case "paper":
-                //아오 함수로 만들걸
-                //<editor-fold desc="밑면 원 만들어주는 과정">
-                double radius_under = (cup_width_under / 2) / 100;
+        Frame frame = arFragment.getArSceneView().getArFrame();
+        Anchor anchor = session.createAnchor(
+                frame.getCamera().getPose()
+                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        .extractTranslation());
+        AnchorNode addedAnchorNode = new AnchorNode(anchor);
+        addedAnchorNode.setEnabled(true);
+        //결과 넣기
+        TextView text = renderable_ui_info.getView().findViewById(R.id.result_text);
+        String msg = selected_cocktail.getRecipe().get(count_).get(4);
+        text.setText(msg);
+        addedAnchorNode.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+        addedAnchorNode.setRenderable(renderable_ui_info);
+        addedAnchorNode.setParent(arFragment.getArSceneView().getScene());
+        Random random = new Random();
+        Color color2 = new Color(android.graphics.Color.argb(180,255, random.nextInt(255), 0));
 
-                Pose midPosition_under = width_pose_under[2];
 
-                //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
-                float[] x_positions_under = new float[8];
-                x_positions_under[0] = width_pose_under[0].tx();
-                x_positions_under[7] = width_pose_under[1].tx();
-
-                float[] z_positions_under = calc_position(radius_under, midPosition_under, x_positions_under);
-
-                Pose[] pose_list_under = make_pose(x_positions_under, width_pose_under[0], z_positions_under);
-
-                pose_list_under[0] = width_pose_under[0];
-                pose_list_under[13] = width_pose_under[1];
-                Anchor[] anchors_under = new Anchor[14];
-                AnchorNode[] anchornodes_under = new AnchorNode[14];
-
-                //0과 마지막 13번인덱스는 위에서 줬음.
-                for (int i = 1; i < 13; i++) {
-                    anchors_under[i] = session.createAnchor(pose_list_under[i]);
-                    anchornodes_under[i] = new AnchorNode(anchors_under[i]);
-                    place(anchornodes_under[i], "");
-                }
-                //0과 마지막 13번째는 빨간색 노드로 표시할거임
-                anchors_under[0] = session.createAnchor(pose_list_under[0]);
-                anchornodes_under[0] = new AnchorNode(anchors_under[0]);
-                place(anchornodes_under[0], "r");
-                anchors_under[13] = session.createAnchor(pose_list_under[13]);
-                anchornodes_under[13] = new AnchorNode(anchors_under[13]);
-                place(anchornodes_under[13], "r");
-                //</editor-fold desc="밑면 원 만들어주는 과정">
-                make_polygon(anchornodes, null, midPosition, "circle");
-                make_polygon(anchornodes_under, null, midPosition_under, "circle");
-                AnchorNode[][] anchorNodesArray = {anchornodes, anchornodes_under};
-                make_polygon(null, anchorNodesArray, midPosition_under, "square");
-            default:
-                break;
+        if(heights[count_]!=0){
+//            //make_cylinder(radius_, heights[count_], midPosition_,width_pose[0],(float) total, color2);
+            make_polygon(anchornodes, null, midPosition_, "circle", color2);
+            make_polygon(anchornodes, null, height_pose[1], "side", color2);
         }
-    }
+        renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addedAnchorNode.setEnabled(false);
+                if(count_+1<recipe_count) iterative_guide_cone(count_+1, rad, radius_, midPosition_, heights);
 
+            }
+        });
+
+    }
     //가이드 밑면 원호 그리는 포지션들 계산해서 z리스트 리턴
     private float[] calc_position(double radius, Pose midposition, float[] x) {
         float[] z_list = new float[14]; // 0과 11번째 인덱스는 비워둘거임(걍 헷갈려서 크기 맞춤,,)
@@ -961,19 +1119,37 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
 
     //가이드 밑면 원 그려줄 앵커들 포즈 생성하는 함수
-    private Pose[] make_pose(float[] x, Pose w_pos, float[] z) {
-        Pose[] p_list = new Pose[14];
-        float[][] position = new float[12][];
-        float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
-        int i = 1;
-        for (int j = 0; j < 12; j++) {
-            position[j] = new float[]{x[i], w_pos.ty(), z[j + 1]};
-            if ((j + 1) % 2 == 0) i++;
+    //Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_]);
+    private Pose[] make_pose(float[] x, Pose w_pos, float[] z, double height) {
+        if (!(cupname.equals("cocktail"))){
+            Pose[] p_list = new Pose[14];
+            float[][] position = new float[12][];
+            float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
+            int i = 1;
+            for (int j = 0; j < 12; j++) {
+                position[j] = new float[]{x[i], w_pos.ty(), z[j + 1]};
+                if ((j + 1) % 2 == 0) i++;
+            }
+            for (int j = 1; j < 13; j++) {
+                p_list[j] = new Pose(position[j - 1], quat);
+            }
+            return p_list;
         }
-        for (int j = 1; j < 13; j++) {
-            p_list[j] = new Pose(position[j - 1], quat);
+        else{
+            Pose[] p_list = new Pose[14];
+            float[][] position = new float[12][];
+            float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
+            int i = 1;
+            for (int j = 0; j < 12; j++) {
+                position[j] = new float[]{x[i], (float) (w_pos.ty()-((cup_height-height)/100.0f)), z[j + 1]};
+                if ((j + 1) % 2 == 0) i++;
+            }
+            for (int j = 1; j < 13; j++) {
+                p_list[j] = new Pose(position[j - 1], quat);
+            }
+            return p_list;
         }
-        return p_list;
+
     }
 
     //가이드 밑면 원 그려줄 앵커들 화면에 배치해주는 함수
@@ -1011,12 +1187,15 @@ public class CameraguideActivity extends AppCompatActivity implements
 
     //계량 높이 구해주는 함수 - 원기둥
     private double calculateHeight_cylinder(double amount, double radius) {
-        return amount / Math.pow(radius, 2) * Math.PI;
+        radius = Math.round(radius*10) / 10.0;
+        double pow_rad =  Math.round(Math.pow(radius, 2)*10) / 10.0;
+        double pi_rad = Math.round(pow_rad * 3.14 *10) / 10.0;
+        return Math.round((amount / pi_rad) *10) / 10.0 ;
     }
 
     //계량 높이 구해주는 함수 - 원뿔
     private double calculateHeight_cone(double amount, double radius, double height) {
-        return Math.pow((3 * Math.pow(height, 2) * amount / (Math.PI * Math.pow(radius, 2))), 1.0 / 3.0);
+        return  Math.round((Math.pow((3 * Math.pow(height, 2) * amount / (Math.PI * Math.pow(radius, 2))), 1.0 / 3.0)) *10) / 10.0;
     }
 
     //계량 높이 구해주는 함수 - 원뿔대
@@ -1032,16 +1211,28 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
 
     //원기둥 그려주는 함수.
-    private void make_cylinder(double radius, float height, Pose mid, Pose width) {
-        Color color2 = new Color(255, 140, 50, 0.35f);
+    private void make_cylinder(double radius, double height, Pose mid, Pose width, float total_, Color color2) {
+        Log.i("info", ""+height);
+        Log.i("info", ""+(width.ty()+total_));
+        float height_ = (float) height;
+        Log.i("info", ""+height);
+        float a = width.ty();
+        Log.i("info", ""+a);
+        a = Math.round(width.ty()) + total_;
+        float finalA = a;
+        Log.i("info", ""+(Math.round((Math.round(((height * 100) / 100.0f)*100)/ 100.0f) * 2.0f)));
         MaterialFactory.makeTransparentWithColor(this, color2)
                 .thenAccept(material -> {
                     Renderable Cylinder;
                     //컵의 두께와 노드를 생각한다면 radius를 좀 더 빼줘도 됨.
                     //랜더러는 앵커(노드)를 중심으로해서 위로 반, 아래로 반 생성된다는 점 잊지말기
-                    Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height, new Vector3(0.0f, height / 2, 0.0f), material);
+                    //원기둥의 높이는 단계마다 필요한 높이에다가 미터단위니까 /100을 해준다.
+                    //저 벡터는 구성되는 실린더의 중심을 의미한단다. 원래 중심이 높이의 가운데니까 높이의 절반 위에 생성된다면 바닥으로부터 올라가는것으로 알고있는데 확실하지 않음..
+                    if (total_ == 0)Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height_, new Vector3(0.0f, height_/2, 0.0f), material);
+                    else Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height_, new Vector3(0.0f, total_/2, 0.0f), material);
                     Cylinder.setShadowCaster(false);
-                    float[] position = {mid.tx(), width.ty(), mid.tz()};
+                    //생성될 위치. x나 z는 중심축과 동일하겠고, y위치는 계속 올라갈것임. 단계가 지나갈수록 height이 쌓이니까 total height은 cm가 될테니 여기에 /100을 해준다.
+                    float[] position = {mid.tx(), (width.ty()+total_), mid.tz()};
                     float[] q = {0.0f, 0.0f, 0.0f, 0.0f};
                     Pose midpose = new Pose(position, q);
                     Session session = arFragment.getArSceneView().getSession();
@@ -1053,7 +1244,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
 
     //원을 그려줄 함수
-    private void make_polygon(AnchorNode[] anchorNodes, AnchorNode[][] anchorNodes_, Pose pos, String polygon) {
+    private void make_polygon(AnchorNode[] anchorNodes, AnchorNode[][] anchorNodes_, Pose pos, String polygon, Color color2) {
         Session session = arFragment.getArSceneView().getSession();
         if (polygon.equals("circle") || polygon.equals("side")) {
             Anchor anchor_pos = session.createAnchor(pos);
@@ -1066,13 +1257,13 @@ public class CameraguideActivity extends AppCompatActivity implements
                     anchorsList.add(anchorNodes[12]);
                     anchorsList.add(anchorNodes[13]);
                     anchorsList.add(anchornode_pos);
-                    make_mash(anchorsList);
+                    make_mash(anchorsList, color2);
                 } else {
                     List<AnchorNode> anchorsList = new ArrayList<>();
                     anchorsList.add(anchorNodes[0]);
                     anchorsList.add(anchorNodes[i + 1]);
                     anchorsList.add(anchornode_pos);
-                    make_mash(anchorsList);
+                    make_mash(anchorsList, color2);
                 }
             }
             for (int i = 1; i < 12; i++) {
@@ -1080,7 +1271,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 anchorsList.add(anchorNodes[i]);
                 anchorsList.add(anchorNodes[i + 2]);
                 anchorsList.add(anchornode_pos);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
             }
         } else if (polygon.equals("square")) {
             //AnchorNode[][] anchorNodes_
@@ -1089,45 +1280,45 @@ public class CameraguideActivity extends AppCompatActivity implements
                 anchorsList.add(anchorNodes_[0][i]);
                 anchorsList.add(anchorNodes_[0][(2 * i) + 1]);
                 anchorsList.add(anchorNodes_[1][i]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
                 anchorsList = new ArrayList<>();
                 anchorsList.add(anchorNodes_[0][i]);
                 anchorsList.add(anchorNodes_[1][Math.abs((2 * i) - 2)]);
                 anchorsList.add(anchorNodes_[1][i]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
             }
             for (int i = 1; i < 6; i++) {
                 List<AnchorNode> anchorsList = new ArrayList<>();
                 anchorsList.add(anchorNodes_[0][(2 * i) + 1]);
                 anchorsList.add(anchorNodes_[0][(2 * i) + 3]);
                 anchorsList.add(anchorNodes_[1][(2 * i) + 1]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
                 anchorsList = new ArrayList<>();
                 anchorsList.add(anchorNodes_[0][(2 * i) + 1]);
                 anchorsList.add(anchorNodes_[1][(2 * i) - 1]);
                 anchorsList.add(anchorNodes_[1][(2 * i) + 1]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
             }
             List<AnchorNode> anchorsList = new ArrayList<>();
             anchorsList.add(anchorNodes_[0][13]);
             anchorsList.add(anchorNodes_[0][12]);
             anchorsList.add(anchorNodes_[1][13]);
-            make_mash(anchorsList);
+            make_mash(anchorsList, color2);
             anchorsList = new ArrayList<>();
             anchorsList.add(anchorNodes_[0][13]);
             anchorsList.add(anchorNodes_[1][11]);
             anchorsList.add(anchorNodes_[1][13]);
-            make_mash(anchorsList);
+            make_mash(anchorsList, color2);
             anchorsList = new ArrayList<>();
             anchorsList.add(anchorNodes_[0][12]);
             anchorsList.add(anchorNodes_[0][10]);
             anchorsList.add(anchorNodes_[1][12]);
-            make_mash(anchorsList);
+            make_mash(anchorsList, color2);
             anchorsList = new ArrayList<>();
             anchorsList.add(anchorNodes_[0][12]);
             anchorsList.add(anchorNodes_[1][13]);
             anchorsList.add(anchorNodes_[1][12]);
-            make_mash(anchorsList);
+            make_mash(anchorsList, color2);
 
 
             for (int i = 10; i > 1; i = i - 2) {
@@ -1135,12 +1326,12 @@ public class CameraguideActivity extends AppCompatActivity implements
                 anchorsList.add(anchorNodes_[0][i]);
                 anchorsList.add(anchorNodes_[0][Math.abs(2 - i)]);
                 anchorsList.add(anchorNodes_[1][i]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
                 anchorsList = new ArrayList<>();
                 anchorsList.add(anchorNodes_[0][i]);
                 anchorsList.add(anchorNodes_[1][2 + i]);
                 anchorsList.add(anchorNodes_[1][i]);
-                make_mash(anchorsList);
+                make_mash(anchorsList, color2);
             }
         }
 
@@ -1148,9 +1339,8 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
 
     //매쉬 만들어주는 함수
-    private void make_mash(List<AnchorNode> anchorsList) {
+    private void make_mash(List<AnchorNode> anchorsList, Color color2) {
         if (anchorsList.size() == 3) {
-            Color color2 = new Color(255, 0, 0, 0.5f);
             MaterialFactory.makeTransparentWithColor(this, color2)
                     .thenAccept(material -> {
                         final Node node = new Node();
