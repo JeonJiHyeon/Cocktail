@@ -49,8 +49,6 @@ public class CocktaillistActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        //getCocktailList 여기 매개변수로 Base 받은곳에 사용자가 선택한 버튼(진 버튼이면 진, 럼이면 럼, 보드카면 보드카)이뭔지 알수있음
-                        //all은 전부 띄워야하구 나머지는 그에 맞는 칵테일만 띄워주면됨!!
                         if (task.isSuccessful()) {
                             ArrayList<Cocktail> cocktails = new ArrayList<Cocktail>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
@@ -99,8 +97,6 @@ public class CocktaillistActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        //getCocktailList 여기 매개변수로 Base 받은곳에 사용자가 선택한 버튼(진 버튼이면 진, 럼이면 럼, 보드카면 보드카)이뭔지 알수있음
-                        //all은 전부 띄워야하구 나머지는 그에 맞는 칵테일만 띄워주면됨!!
                         if (task.isSuccessful()) {
                             ArrayList<Cocktail> cocktails = new ArrayList<Cocktail>();
                             for (QueryDocumentSnapshot document : task.getResult()) {

@@ -170,7 +170,12 @@
                 android:layout_width="100dp"
                 android:layout_height="275dp"
                 android:layout_marginTop="38dp"
-                android:text="Button"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="-2dp
+"
+                android:text="레드아이"
+                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -181,7 +186,10 @@
                 android:layout_height="275dp"
                 android:layout_marginTop="38dp"
                 android:layout_marginEnd="40dp"
-                android:text="Button"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:text="스팅어"
+                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -191,7 +199,10 @@
                 android:layout_height="275dp"
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="38dp"
-                android:text="Button"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:text="마티니"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

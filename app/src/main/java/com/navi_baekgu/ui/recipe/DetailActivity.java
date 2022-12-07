@@ -54,7 +54,7 @@ public class DetailActivity extends AppCompatActivity {
                 ingredient_string = ingredient_string + recipe.get(i).get(1) + ",\n";
             }
             recipe_string = recipe_string + (i + 1 + ". ") + recipe.get(i).get(4) + "\n";
-            if (i > 6) {
+            if (i > 4) {
                 params.height = params.height + 20;
                 Log.i("info", "" + params.height);
                 binding.detailLl.setLayoutParams(params);

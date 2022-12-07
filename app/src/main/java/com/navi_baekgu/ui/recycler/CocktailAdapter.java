@@ -48,7 +48,6 @@ public class CocktailAdapter extends RecyclerView.Adapter<CocktailAdapter.ViewHo
                         Intent intent = new Intent(v.getContext(), DetailActivity.class);
                         intent.putExtra("selected_cocktail", mdatas.get(position_info));
                         v.getContext().startActivity(intent);
-
                     }
                 }
             });
