@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.ar.core.Anchor;
+import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
@@ -533,6 +534,12 @@ public class CameraguideActivity extends AppCompatActivity implements
     @Override
     public void onTapPlane(HitResult hitResult, Plane plane, MotionEvent motionEvent) {
         if (numberOfAnchors < MAX_ANCHORS) {
+            if (numberOfAnchors !=0 ){
+                Config config = arFragment.getArSceneView().getSession().getConfig();
+                config.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
+                arFragment.getArSceneView().getSession().configure(config);
+
+            }
             // Create the Anchor. hit값에 따라서 앵커 생성
             Anchor anchor = hitResult.createAnchor();
             AnchorNode anchorNode = new AnchorNode(anchor);
@@ -593,7 +600,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         float x = anchorNodeList.get(0).getWorldPosition().x - anchorNodeList.get(1).getWorldPosition().x;
         float y = anchorNodeList.get(0).getWorldPosition().y - anchorNodeList.get(1).getWorldPosition().y;
         float z = anchorNodeList.get(0).getWorldPosition().z - anchorNodeList.get(1).getWorldPosition().z;
-        //유클리디안 거리 계산 및, 소수점 두자리까지 반영
+        //유클리디안 거리 계산 및, 소수점 두자리까지 반영 cm로 저장할거라서 * 100 해줌
         double result = Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) * 100 * 100) / 100.0;
 
         float mid_x = (anchorNodeList.get(0).getWorldPosition().x + anchorNodeList.get(1).getWorldPosition().x) / 2;
@@ -859,31 +866,52 @@ public class CameraguideActivity extends AppCompatActivity implements
         //(x-a)^2 + (z-c)^2 = r^2 으로 이 위에 있는 점들을 구한다.
         //인자로 넘어온 radius 값은 cm단위고 오픈gl은 m단위체계이므로 100을 나눠주도록 한다.
         //<editor-fold desc="원 만들어주는 과정">
-        double radius = (cup_width / 2) / 100;
+        double radius__ = (cup_width / 2) / 100.0;
+        double radius = Math.round(radius__ * 100) / 100.0;
         double[] r_volume = new double[recipe_count+1];
         double[] height = new double[recipe_count+1];
         double[] total_volume = new double[recipe_count+2];
         double[] cone_rad = new double[recipe_count+1];
         total_volume[0] = Integer.parseInt(selected_cocktail.getRecipe().get(0).get(2));
         for (int i=0; i<recipe_count; i++){
-            r_volume[i] = Integer.parseInt(selected_cocktail.getRecipe().get(i).get(2));
-            total_volume[i+1] = total_volume[i] + r_volume[i];
-            if(cupname.equals("mug")) height[i] = (float) calculateHeight_cylinder(r_volume[i], radius * 100) / 100.f;
+            try {
+                r_volume[i] = Integer.parseInt(selected_cocktail.getRecipe().get(i).get(2));
+            } catch (NumberFormatException e) {
+//                r_volume[i] = Integer.parseInt(selected_cocktail.getRecipe().get(i).get(2));
+                //이 부분.. 0.5같은건 int로 안됨. string . 기준으로 잘라서 따로따로 넣어주면 될듯.
+                //일단 0으로 넣자
+                r_volume[i] = 0;
+            }
+
+            if (r_volume[i]!=0) total_volume[i+1] = total_volume[i] + r_volume[i];
+            double result = (calculateHeight_cylinder(r_volume[i], radius * 100.0)) / 1000.0;
+
+            if(cupname.equals("mug")) height[i] = Math.round(result * 10000) / 10000.0;
+
             //(double amount, double radius, double height)
             else if(cupname.equals("cocktail")) {
-                height[i] = (float) calculateHeight_cone(total_volume[i], radius * 100, cup_height) / 100.f;
+                double result2 = (calculateHeight_cone(total_volume[i], radius * 100.0, cup_height)) / 1000.0;
+
+                height[i] = Math.round(result2 * 10000) / 10000.0;
+
                 cone_rad[i] = Double.parseDouble(String.format("%.9f",new BigDecimal(((radius * height[i]) / cup_height))));
                 Log.i("반지름",""+cone_rad[i] );
             }
+            Log.i("info", ""+radius);
+            Log.i("info", ""+result);
+            Log.i("info", ""+r_volume[i]);
+            Log.i("info", ""+height[i]);
+            Log.i("info", ""+total_volume[i]);
+            Log.i("info", "total i+1 "+total_volume[i+1]);
         }
         //</editor-fold desc="원 만들어주는 과정">
-        count=0; total=0;
+        count=0;
         switch (cupname) {
             case "mug":
                 //가이드 진행에 맞게 height 맞춰서 make실린더도 변수를 바꿔가며 실행시키면 된다.
                 //선택된 칵테일 여기서 불러와서 쓰면 됨. selected_cocktail
                 Pose midPosition = width_pose[2];
-
+                total=0;
                 //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
                 float[] x_positions = new float[8];
                 x_positions[0] = width_pose[0].tx();
@@ -1024,7 +1052,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
 
 
-        if(heights[count_]!=0)make_cylinder(radius_, heights[count_], midPosition_,width_pose[0],(float) total, color2);
+        if(heights[count_]!=0) make_cylinder(radius_, heights[count_], midPosition_,width_pose[0],(float) total, color2);
         total = total + heights[count_];
         renderable_ui_info.getView().findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1185,17 +1213,14 @@ public class CameraguideActivity extends AppCompatActivity implements
         return Math.pow(radius, 2) * Math.PI * height;
     }
 
-    //계량 높이 구해주는 함수 - 원기둥
+    //계량 높이 구해주는 함수 - 원기둥 cm 받음
     private double calculateHeight_cylinder(double amount, double radius) {
-        radius = Math.round(radius*10) / 10.0;
-        double pow_rad =  Math.round(Math.pow(radius, 2)*10) / 10.0;
-        double pi_rad = Math.round(pow_rad * 3.14 *10) / 10.0;
-        return Math.round((amount / pi_rad) *10) / 10.0 ;
+        return amount / Math.pow(radius,2) * Math.PI;
     }
 
     //계량 높이 구해주는 함수 - 원뿔
     private double calculateHeight_cone(double amount, double radius, double height) {
-        return  Math.round((Math.pow((3 * Math.pow(height, 2) * amount / (Math.PI * Math.pow(radius, 2))), 1.0 / 3.0)) *10) / 10.0;
+        return  Math.pow((3 * Math.pow(height,2) * amount / (Math.PI * Math.pow(radius,2))), 1.0 / 3.0);
     }
 
     //계량 높이 구해주는 함수 - 원뿔대
@@ -1229,7 +1254,8 @@ public class CameraguideActivity extends AppCompatActivity implements
                     //원기둥의 높이는 단계마다 필요한 높이에다가 미터단위니까 /100을 해준다.
                     //저 벡터는 구성되는 실린더의 중심을 의미한단다. 원래 중심이 높이의 가운데니까 높이의 절반 위에 생성된다면 바닥으로부터 올라가는것으로 알고있는데 확실하지 않음..
                     if (total_ == 0)Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height_, new Vector3(0.0f, height_/2, 0.0f), material);
-                    else Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height_, new Vector3(0.0f, total_/2, 0.0f), material);
+                    //지금까지 높이 계산이 조금 이상했던거랑 내가 토탈을 여기 바로아래코드에서 더해줘서 그런거였삼
+                    else Cylinder = ShapeFactory.makeCylinder((float) radius - 0.00025f, height_, new Vector3(0.0f,  (height_/2), 0.0f), material);
                     Cylinder.setShadowCaster(false);
                     //생성될 위치. x나 z는 중심축과 동일하겠고, y위치는 계속 올라갈것임. 단계가 지나갈수록 height이 쌓이니까 total height은 cm가 될테니 여기에 /100을 해준다.
                     float[] position = {mid.tx(), (width.ty()+total_), mid.tz()};
