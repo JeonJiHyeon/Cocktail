@@ -916,7 +916,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //원뿔부피식을 이항해서 쓰는중인데
                 //부피가 계속 누적되어야 하니까 누적된 부피 넣어줬음
                 //double radius, double height, double new_height
-                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0));
+                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0))/10;
                 Log.i("soyeon", "result3 : "+result3);
                 cone_rad[i] = Math.round(result3 * 1000) / 1000.0;
                 Log.i("info","원뿔 반지름(변화) : "+cone_rad[i]);
@@ -1123,7 +1123,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         Pose newmid = new Pose(newmid_, new float[]{0.0f, 0.0f, 0.0f, 0.0f});
 
         //z포지션 다른 애들(원호 그리는 애들) 구하기
-        float[] z_positions = calc_position(radius_[count_], newmid, x_positions);
+        float[] z_positions = calc_position(radius_[count_], midPosition_, x_positions);
 
         //그걸로 포즈 리스트 만들기
         Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_], cheight);
@@ -1246,8 +1246,14 @@ public class CameraguideActivity extends AppCompatActivity implements
             float[][] position = new float[12][];
             float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
 
+            cheight = cheight / 100.0;
+            height = height / 100.0;
 
             float[] pos = {x[0], (float) (w_pos.ty()-(cheight-height)), width_pose[0].tz()};
+            Log.i("soyeon", "w_pos.ty(): "+w_pos.ty());
+            Log.i("soyeon", "cheight-height: "+(cheight-height));
+            Log.i("soyeon", "w_pos.ty()-(cheight-height): "+(float) (w_pos.ty()-(cheight-height)));
+            Log.i("soyeon", "height_pose[1]: "+height_pose[1]);
             p_list[0] = new Pose(pos,quat);
             float[] pos1 = {x[7], (float) (w_pos.ty() - (cheight - height)), width_pose[1].tz()};
             p_list[13] = new Pose(pos1,quat);
