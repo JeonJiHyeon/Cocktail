@@ -86,6 +86,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Button complete_btn;
     private Button result_;
     private String cupname;
+    private Button out_btn;
     private boolean cancle;
     private Cocktail selected_cocktail;
     private int recipe_count = 0;
@@ -124,6 +125,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         result_ = (Button) findViewById(R.id.flag);
         leftButton = findViewById(R.id.left);
         rightButton = findViewById(R.id.right);
+        out_btn = findViewById(R.id.out_btn);
 //</editor-fold desc="변수 매칭구간">
         numberOfAnchors = MAX_ANCHORS;
         getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, fragment) -> {
@@ -188,6 +190,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     return null;
                 });
 //</editor-fold desc="렌더러블 초기 설정">
+
         //머그컵 버튼 클릭리스너
         mug_cup_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -463,6 +466,13 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = MAX_ANCHORS;
             }
         });
+        //나가기
+        out_btn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraguideActivity.this.finish();
+            }
+        });
         //생성된 노드를 삭제하는 버튼 클릭리스너 - 가장 최근에 만든 버튼부터 삭제
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -604,8 +614,10 @@ public class CameraguideActivity extends AppCompatActivity implements
         float mid_y = (anchorNodeList.get(0).getWorldPosition().y + anchorNodeList.get(1).getWorldPosition().y) / 2;
         float mid_z = (anchorNodeList.get(0).getWorldPosition().z + anchorNodeList.get(1).getWorldPosition().z) / 2;
         float[] mid = {mid_x, mid_y, mid_z};
+        float[] res_mid = {mid_x-0.03f, mid_y+0.05f, mid_z};
         float[] mid_q = {0.0f, 0.0f, 0.0f, 0.0f};
         Pose midPosition = new Pose(mid, mid_q);
+        Pose resPosition = new Pose(res_mid, mid_q);
 
         switch (s) {
             case "h":
@@ -637,7 +649,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         //2d ui를 렌더링함. 방법 : 그냥 두 점 사이 중간값을 측정해서 노드 추가하고 그 위치에 띄워준 것.
         renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
         Session session = arFragment.getArSceneView().getSession();
-        Anchor anchor = session.createAnchor(midPosition);
+        Anchor anchor = session.createAnchor(resPosition);
         resultanchor = new AnchorNode(anchor);
         resultanchor.setParent(arFragment.getArSceneView().getScene());
         resultanchor.setEnabled(true);
@@ -733,7 +745,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             }
         });
         resultanchor.setRenderable(renderable_ui_result);
-        resultanchor.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+        resultanchor.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
 
         save_result(result, s);
     }
@@ -1037,7 +1049,8 @@ public class CameraguideActivity extends AppCompatActivity implements
         Frame frame = arFragment.getArSceneView().getArFrame();
         Anchor anchor = session.createAnchor(
                 frame.getCamera().getPose()
-                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        //카메라(내위치)기준이고, y는 내기준 양옆의미 음수가 되면 왼쪽으로 감. x는 내기준 위아래, 양수가 되면 아래로 내려감 z는 내기준 내 앞뒤를 의미 양수는 내 뒤를 의미
+                        .compose(Pose.makeTranslation(-0.08f, 0.05f, -1f)) //This will place the anchor 1M in front of the camera
                         .extractTranslation());
         AnchorNode addedAnchorNode = new AnchorNode(anchor);
         addedAnchorNode.setEnabled(true);
@@ -1052,7 +1065,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
 
         Random random = new Random();
-        Color color2 = new Color(android.graphics.Color.argb(180,255, random.nextInt(255), 0));
+        Color color2 = new Color(android.graphics.Color.argb(100,255, random.nextInt(255), 0));
 
 
 
@@ -1063,6 +1076,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 addedAnchorNode.setEnabled(false);
                 if(count_+1<recipe_count) iterative_guide(count_+1, radius_, midPosition_, heights);
+                else out_btn.setVisibility(View.VISIBLE);
 
             }
         });
@@ -1126,7 +1140,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         Frame frame = arFragment.getArSceneView().getArFrame();
         Anchor anchor = session.createAnchor(
                 frame.getCamera().getPose()
-                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        .compose(Pose.makeTranslation(-0.08f, 0.05f, -1f)) //This will place the anchor 1M in front of the camera
                         .extractTranslation());
         AnchorNode addedAnchorNode = new AnchorNode(anchor);
         addedAnchorNode.setEnabled(true);
@@ -1150,6 +1164,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 addedAnchorNode.setEnabled(false);
                 if(count_+1<recipe_count) iterative_guide_cone(count_+1, rad, radius_, midPosition_, heights, cheight);
+                else out_btn.setVisibility(View.VISIBLE);
 
             }
         });
