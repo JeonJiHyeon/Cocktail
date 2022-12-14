@@ -86,6 +86,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private Button complete_btn;
     private Button result_;
     private String cupname;
+    private Button out_btn;
     private boolean cancle;
     private Cocktail selected_cocktail;
     private int recipe_count = 0;
@@ -124,6 +125,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         result_ = (Button) findViewById(R.id.flag);
         leftButton = findViewById(R.id.left);
         rightButton = findViewById(R.id.right);
+        out_btn = findViewById(R.id.out_btn);
 //</editor-fold desc="변수 매칭구간">
         numberOfAnchors = MAX_ANCHORS;
         getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, fragment) -> {
@@ -187,6 +189,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     return null;
                 });
 //</editor-fold desc="렌더러블 초기 설정">
+
         //머그컵 버튼 클릭리스너
         mug_cup_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -462,6 +465,13 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = MAX_ANCHORS;
             }
         });
+        //나가기
+        out_btn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraguideActivity.this.finish();
+            }
+        });
         //생성된 노드를 삭제하는 버튼 클릭리스너 - 가장 최근에 만든 버튼부터 삭제
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -603,8 +613,10 @@ public class CameraguideActivity extends AppCompatActivity implements
         float mid_y = (anchorNodeList.get(0).getWorldPosition().y + anchorNodeList.get(1).getWorldPosition().y) / 2;
         float mid_z = (anchorNodeList.get(0).getWorldPosition().z + anchorNodeList.get(1).getWorldPosition().z) / 2;
         float[] mid = {mid_x, mid_y, mid_z};
+        float[] res_mid = {mid_x-0.03f, mid_y+0.05f, mid_z};
         float[] mid_q = {0.0f, 0.0f, 0.0f, 0.0f};
         Pose midPosition = new Pose(mid, mid_q);
+        Pose resPosition = new Pose(res_mid, mid_q);
 
         switch (s) {
             case "h":
@@ -636,8 +648,9 @@ public class CameraguideActivity extends AppCompatActivity implements
         //2d ui를 렌더링함. 방법 : 그냥 두 점 사이 중간값을 측정해서 노드 추가하고 그 위치에 띄워준 것.
         renderable_ui_info.getView().findViewById(R.id.close_btn).performClick();
         Session session = arFragment.getArSceneView().getSession();
+        Anchor anchor_res = session.createAnchor(resPosition);
         Anchor anchor = session.createAnchor(midPosition);
-        resultanchor = new AnchorNode(anchor);
+        resultanchor = new AnchorNode(anchor_res);
         resultanchor.setParent(arFragment.getArSceneView().getScene());
         resultanchor.setEnabled(true);
         //결과 넣기
@@ -732,7 +745,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             }
         });
         resultanchor.setRenderable(renderable_ui_result);
-        resultanchor.setLocalScale(new Vector3(0.4f, 0.4f, 0.4f));
+        resultanchor.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
 
         save_result(result, s);
     }
@@ -891,7 +904,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             //(double amount, double radius, double height)
             else if(cupname.equals("cocktail")) {
                 double result2 = (calculateHeight_cone(total_volume[i], radius * 100.0, cheight * 100.0)) / 1000.0;
-
+                Log.i("info", "원뿔 높이, 소숫점 떼기 전 : "+ result2);
                 height[i] = Math.round(result2 * 10000) / 10000.0;
                 Log.i("info", "원뿔 높이 : "+height[i]);
 
@@ -906,12 +919,11 @@ public class CameraguideActivity extends AppCompatActivity implements
                 double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0));
                 Log.i("soyeon", "result3 : "+result3);
                 cone_rad[i] = Math.round(result3 * 1000) / 1000.0;
-                Log.i("info","원뿔 반지름 : "+cone_rad[i] );
+                Log.i("info","원뿔 반지름(변화) : "+cone_rad[i]);
             }
-            Log.i("info", ""+r_volume[i]);
-
-            Log.i("info", ""+total_volume[i]);
-            Log.i("info", "total i+1 "+total_volume[i+1]);
+            Log.i("info", "레시피에서 나온 부피"+r_volume[i]);
+            Log.i("info", "부피 누적값"+total_volume[i]);
+            Log.i("info", "누적값 +1한 인덱스 i+1 "+total_volume[i+1]);
         }
         //</editor-fold desc="원 만들어주는 과정">
         count=0;
@@ -963,6 +975,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 break;
             case "paper":
                 //아오 함수로 만들걸
+                //<editor-fold desc="원 만들어주는 과정">
                 Pose midPosition3 = width_pose[2];
 
                 //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
@@ -1043,7 +1056,8 @@ public class CameraguideActivity extends AppCompatActivity implements
         Frame frame = arFragment.getArSceneView().getArFrame();
         Anchor anchor = session.createAnchor(
                 frame.getCamera().getPose()
-                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        //카메라(내위치)기준이고, y는 내기준 양옆의미 음수가 되면 왼쪽으로 감. x는 내기준 위아래, 양수가 되면 아래로 내려감 z는 내기준 내 앞뒤를 의미 양수는 내 뒤를 의미
+                        .compose(Pose.makeTranslation(-0.08f, 0.05f, -1f)) //This will place the anchor 1M in front of the camera
                         .extractTranslation());
         AnchorNode addedAnchorNode = new AnchorNode(anchor);
         addedAnchorNode.setEnabled(true);
@@ -1058,7 +1072,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
 
         Random random = new Random();
-        Color color2 = new Color(android.graphics.Color.argb(180,255, random.nextInt(255), 0));
+        Color color2 = new Color(android.graphics.Color.argb(100,255, random.nextInt(255), 0));
 
 
 
@@ -1069,6 +1083,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 addedAnchorNode.setEnabled(false);
                 if(count_+1<recipe_count) iterative_guide(count_+1, radius_, midPosition_, heights);
+                else out_btn.setVisibility(View.VISIBLE);
 
             }
         });
@@ -1078,8 +1093,8 @@ public class CameraguideActivity extends AppCompatActivity implements
     private void iterative_guide_cone(int count_,double rad, double[] radius_, Pose midPosition_, double[] heights, double cheight){
         //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
         float[] x_positions = new float[8];
-        Log.i("info", ""+rad);
-        Log.i("info", ""+radius_[0]);
+        Log.i("info", "m단위 반지름"+rad);
+        Log.i("info", "m단위 변하는반지름 "+radius_[0]);
 
         //양끝단 width pose들은, 원래 있던 position의 의미는 자기 중심점에서 반지름만큼 나오거나 들어온것,
         //반지름이 줄어들었다면, (원래 반지름 - 지금 반지름) 한게 그만큼의 차이임(좌표 위에서 줄어든 양). 수직선상에서 +나 -해주면 x포지션 나옴.
@@ -1109,6 +1124,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
         //z포지션 다른 애들(원호 그리는 애들) 구하기
         float[] z_positions = calc_position(radius_[count_], newmid, x_positions);
+
         //그걸로 포즈 리스트 만들기
         Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_], cheight);
 
@@ -1132,7 +1148,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         Frame frame = arFragment.getArSceneView().getArFrame();
         Anchor anchor = session.createAnchor(
                 frame.getCamera().getPose()
-                        .compose(Pose.makeTranslation(0.2f, 0.2f, -1.0f)) //This will place the anchor 1M in front of the camera
+                        .compose(Pose.makeTranslation(-0.08f, 0.05f, -1f)) //This will place the anchor 1M in front of the camera
                         .extractTranslation());
         AnchorNode addedAnchorNode = new AnchorNode(anchor);
         addedAnchorNode.setEnabled(true);
@@ -1156,6 +1172,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             public void onClick(View view) {
                 addedAnchorNode.setEnabled(false);
                 if(count_+1<recipe_count) iterative_guide_cone(count_+1, rad, radius_, midPosition_, heights, cheight);
+                else out_btn.setVisibility(View.VISIBLE);
 
             }
         });
@@ -1169,8 +1186,8 @@ public class CameraguideActivity extends AppCompatActivity implements
         //혹시 몰라서 소숫점 6자리까지 고려한다는 뜻
         float cm = (float) (Math.round(cm__ * 1000000) / 1000000.0);
         Log.i("info", "x[7] - x[0] : "+ (x[7] - x[0]));
-        Log.i("info", "cm__ : "+cm__);
-        Log.i("info", "cm : "+cm);
+        Log.i("info", "절댓값하고 7로 나눔 : "+cm__);
+        Log.i("info", "소숫점 6자리까지 반영 : "+cm);
 
         //둘중 작은걸 선택함. 작은것부터 cm만큼 더해줘야 하니까? 이부분도 필요한지 몰겟지만 일단 일케 썻음
         float tmp = Math.min(x[0], x[7]);
