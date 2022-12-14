@@ -916,7 +916,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //원뿔부피식을 이항해서 쓰는중인데
                 //부피가 계속 누적되어야 하니까 누적된 부피 넣어줬음
                 //double radius, double height, double new_height
-                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0));
+                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0))/10;
                 Log.i("soyeon", "result3 : "+result3);
                 cone_rad[i] = Math.round(result3 * 1000) / 1000.0;
                 Log.i("info","원뿔 반지름(변화) : "+cone_rad[i]);
