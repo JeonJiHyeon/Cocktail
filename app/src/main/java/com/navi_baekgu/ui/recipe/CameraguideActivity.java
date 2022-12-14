@@ -642,9 +642,10 @@ public class CameraguideActivity extends AppCompatActivity implements
                 Pose pose3 = new Pose(pos3, mid_q);
                 Pose pose4 = new Pose(pos4, mid_q);
                 //x비교해서 작은게 맨 앞인덱스로 오도록 함
-                float tmp = Math.min(pose3.tx(),pose4.tx());
-                if (tmp == pose3.tx()) width_pose = new Pose[]{pose3, pose4, midPosition};
-                else width_pose = new Pose[]{pose4, pose3, midPosition};
+//                float tmp = Math.min(pose3.tx(),pose4.tx());
+//                if (tmp == pose3.tx()) width_pose = new Pose[]{pose3, pose4, midPosition};
+//                else width_pose = new Pose[]{pose4, pose3, midPosition};
+                width_pose = new Pose[]{pose3, pose4, midPosition};
 
                 break;
             case "w_under":
@@ -901,7 +902,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         double[] cone_rad = new double[recipe_count+1];
         total_volume[0] = Integer.parseInt(selected_cocktail.getRecipe().get(0).get(2));
 
-        double result__ = (calculateHeight_cone(total_volume[0], radius * 100.0, cheight * 100.0)) / 1000.0;
+        double result__ = (calculateHeight_cone(total_volume[0], radius * 100.0, cheight * 100.0)) / 100.0;
         total_height[0] = Math.round(result__ * 10000) / 10000.0;
         for (int i=0; i<recipe_count; i++){
             try {
@@ -920,12 +921,12 @@ public class CameraguideActivity extends AppCompatActivity implements
 
             //(double amount, double radius, double height)
             else if(cupname.equals("cocktail")) {
-                double result2 = (calculateHeight_cone(total_volume[i], radius * 100.0, cheight * 100.0)) / 1000.0;
+                double result2 = (calculateHeight_cone(total_volume[i], radius * 100.0, cheight * 100.0)) / 100.0;
                 Log.i("info", "원뿔 높이, 소숫점 떼기 전 : "+ result2);
                 height[i] = Math.round(result2 * 10000) / 10000.0;
                 if (height[i]!=0) total_height[i+1] = total_height[i] + height[i];
                 Log.i("info", "원뿔 높이 : "+height[i]);
-
+                Log.i("info", "원뿔 높이- 토탈 : "+total_height[i]);
                 Log.i("soyeon", "cheight * 100.0 : "+cheight * 100.0);
                 Log.i("soyeon", "radius * 100.0 : "+radius * 100.0);
                 Log.i("soyeon", "height[i] : "+height[i] * 100.0);
@@ -934,7 +935,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //원뿔부피식을 이항해서 쓰는중인데
                 //부피가 계속 누적되어야 하니까 누적된 부피 넣어줬음
                 //double radius, double height, double new_height
-                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0))/10;
+                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, total_height[i] * 100.0))/100.0;
                 Log.i("soyeon", "result3 : "+result3);
                 cone_rad[i] = Math.round(result3 * 1000) / 1000.0;
                 Log.i("info","원뿔 반지름(변화) : "+cone_rad[i]);
@@ -1113,7 +1114,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
         float[] x_positions = new float[8];
         Log.i("info", "m단위 반지름"+rad);
-        Log.i("info", "m단위 변하는반지름 "+radius_[0]);
+        Log.i("info", "m단위 변하는반지름 "+radius_[count_]);
 
         //양끝단 width pose들은, 원래 있던 position의 의미는 자기 중심점에서 반지름만큼 나오거나 들어온것,
         //반지름이 줄어들었다면, (원래 반지름 - 지금 반지름) 한게 그만큼의 차이임(좌표 위에서 줄어든 양). 수직선상에서 +나 -해주면 x포지션 나옴.
@@ -1129,12 +1130,10 @@ public class CameraguideActivity extends AppCompatActivity implements
         //
         //지금 x포지션까지는 괜찮은 것 같은데 calc_position으로 z 구하는것부터 막힘ㅜ
 
-        if (width_pose[0].tx()<0) x_positions[0] = (float) (width_pose[0].tx() + (rad - radius_[count_]));
-        else x_positions[0] = (float) (width_pose[0].tx() - (rad - radius_[count_]));
+        x_positions[0] = (float) (width_pose[2].tx() - radius_[count_]);
         Log.i("info", "콘 x position 0 : "+x_positions[0]);
 
-        if (width_pose[1].tx()<0) x_positions[7] = (float) (width_pose[1].tx() + (rad - radius_[count_]));
-        else x_positions[7] = (float) (width_pose[1].tx() - (rad - radius_[count_]));
+        x_positions[7] = (float) (width_pose[2].tx() + radius_[count_]);
         Log.i("info", "콘 x position 7 : "+x_positions[7]);
 
         //뉴미드로 따로 만든 이유는 미드 포지션 y도 높이 계속 변화함에 따라서 y포지션이 변화하기 때문
@@ -1208,13 +1207,10 @@ public class CameraguideActivity extends AppCompatActivity implements
         Log.i("info", "절댓값하고 7로 나눔 : "+cm__);
         Log.i("info", "소숫점 6자리까지 반영 : "+cm);
 
-        //둘중 작은걸 선택함. 작은것부터 cm만큼 더해줘야 하니까? 이부분도 필요한지 몰겟지만 일단 일케 썻음
-        float tmp = Math.min(x[0], x[7]);
-
         //x포지션은 1-6인덱스
         for (int i = 1; i < 7; i++) {
             //x포지션 넣기
-            x[i] = tmp + i * cm;
+            x[i] = x[0] + i * cm;
 
             //(x-mid.tx())^2 + (z-mid.tz())^2 = radius^2 식 활용
 
@@ -1265,22 +1261,32 @@ public class CameraguideActivity extends AppCompatActivity implements
             float[][] position = new float[12][];
             float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
 
-            cheight = cheight / 100.0;
-            double height = total_h[count_] / 100.0;
-            Log.i("info",""+w_pos.ty());
-            Log.i("info",""+(w_pos.ty()-(cheight-height)));
-            Log.i("info",""+height_pose[1]);
-            float[] pos = {x[0], (float) (w_pos.ty()-(cheight-height)), width_pose[0].tz()};
+            double height = total_h[count_];
+
             Log.i("soyeon", "w_pos.ty(): "+w_pos.ty());
+            Log.i("soyeon", "cheight: "+cheight);
+            Log.i("soyeon", "height: "+height);
             Log.i("soyeon", "cheight-height: "+(cheight-height));
             Log.i("soyeon", "w_pos.ty()-(cheight-height): "+(float) (w_pos.ty()-(cheight-height)));
+            Log.i("soyeon", "w_pos.ty()+(cheight-height): "+(float) (w_pos.ty()+(cheight-height)));
             Log.i("soyeon", "height_pose[1]: "+height_pose[1]);
+            float[] pos, pos1;
+            if (w_pos.ty()<0){
+                pos = new float[]{x[0], (float) (w_pos.ty() - (cheight - height)), width_pose[0].tz()};
+                pos1 = new float[]{x[7], (float) (w_pos.ty() - (cheight - height)), width_pose[1].tz()};
+            }
+            else{
+                pos = new float[]{x[0], (float) (w_pos.ty() + (cheight - height)), width_pose[0].tz()};
+                pos1 = new float[]{x[7], (float) (w_pos.ty() + (cheight - height)), width_pose[1].tz()};
+            }
             p_list[0] = new Pose(pos,quat);
-            float[] pos1 = {x[7], (float) (w_pos.ty() - (cheight - height)), width_pose[1].tz()};
             p_list[13] = new Pose(pos1,quat);
             int i = 1;
             for (int j = 0; j < 12; j++) {
-                position[j] = new float[]{x[i], (float) (w_pos.ty()-(cheight-height)), z[j + 1]};
+                if (w_pos.ty()<0){
+                    position[j] = new float[]{x[i], (float) (w_pos.ty()-(cheight-height)), z[j + 1]};
+                }
+                else position[j] = new float[]{x[i], (float) (w_pos.ty()+(cheight-height)), z[j + 1]};
                 if ((j + 1) % 2 == 0) i++;
             }
             for (int j = 1; j < 13; j++) {
@@ -1335,6 +1341,10 @@ public class CameraguideActivity extends AppCompatActivity implements
     }
     // 좁아진 반지름
     private double calculaterad_cone(double radius, double height, double new_height) {
+        Log.i("info", "radius : "+radius);
+        Log.i("info", "height : "+height);
+        Log.i("info", "new_height : "+new_height);
+        Log.i("info", "(radius / height) * new_height : "+((radius / height) * new_height));
         return (radius / height) * new_height;
     }
 
