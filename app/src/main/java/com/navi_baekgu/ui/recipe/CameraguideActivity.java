@@ -139,6 +139,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.arFragment, ArFragment.class, null)
                     .commit();
+
         }
 //<editor-fold desc="렌더러블 초기 설정">
         //Material 색상 지정하고, 그걸로 shapeFactory를 통해 랜더러블 구를 생성함 radius 0.01f
@@ -316,6 +317,9 @@ public class CameraguideActivity extends AppCompatActivity implements
         cocktail_glass_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Config config = arFragment.getArSceneView().getSession().getConfig();
+                config.setPlaneFindingMode(Config.PlaneFindingMode.HORIZONTAL);
+                arFragment.getArSceneView().getSession().configure(config);
                 cancle = false;
                 cupname = "cocktail";
                 mug_cup_btn.setVisibility(View.GONE);
@@ -545,6 +549,11 @@ public class CameraguideActivity extends AppCompatActivity implements
     //탭 했을때 노드 생성하고 측정하는걸 연결해주는? 함수
     @Override
     public void onTapPlane(HitResult hitResult, Plane plane, MotionEvent motionEvent) {
+        if (numberOfAnchors >= 1){
+            Config config = arFragment.getArSceneView().getSession().getConfig();
+            config.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
+            arFragment.getArSceneView().getSession().configure(config);
+        }
         if (numberOfAnchors < MAX_ANCHORS) {
             // Create the Anchor. hit값에 따라서 앵커 생성
             Anchor anchor = hitResult.createAnchor();
@@ -632,7 +641,11 @@ public class CameraguideActivity extends AppCompatActivity implements
                 float[] pos4 = {anchorNodeList.get(1).getWorldPosition().x, anchorNodeList.get(1).getWorldPosition().y, anchorNodeList.get(1).getWorldPosition().z};
                 Pose pose3 = new Pose(pos3, mid_q);
                 Pose pose4 = new Pose(pos4, mid_q);
-                width_pose = new Pose[]{pose3, pose4, midPosition};
+                //x비교해서 작은게 맨 앞인덱스로 오도록 함
+                float tmp = Math.min(pose3.tx(),pose4.tx());
+                if (tmp == pose3.tx()) width_pose = new Pose[]{pose3, pose4, midPosition};
+                else width_pose = new Pose[]{pose4, pose3, midPosition};
+
                 break;
             case "w_under":
                 //가로 모드는 중간값을 넘겨준다. 세로는 그럴 필요 없는듯?
@@ -884,8 +897,12 @@ public class CameraguideActivity extends AppCompatActivity implements
         double[] r_volume = new double[recipe_count+1];
         double[] height = new double[recipe_count+1];
         double[] total_volume = new double[recipe_count+2];
+        double[] total_height = new double[recipe_count+2];
         double[] cone_rad = new double[recipe_count+1];
         total_volume[0] = Integer.parseInt(selected_cocktail.getRecipe().get(0).get(2));
+
+        double result__ = (calculateHeight_cone(total_volume[0], radius * 100.0, cheight * 100.0)) / 1000.0;
+        total_height[0] = Math.round(result__ * 10000) / 10000.0;
         for (int i=0; i<recipe_count; i++){
             try {
                 r_volume[i] = Integer.parseInt(selected_cocktail.getRecipe().get(i).get(2));
@@ -898,7 +915,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
             if (r_volume[i]!=0) total_volume[i+1] = total_volume[i] + r_volume[i];
             double result = (calculateHeight_cylinder(r_volume[i], radius * 100.0)) / 1000.0;
-
+            Log.i("info", "원기둥 높이 : "+ result);
             if(cupname.equals("mug")) height[i] = Math.round(result * 10000) / 10000.0;
 
             //(double amount, double radius, double height)
@@ -906,6 +923,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 double result2 = (calculateHeight_cone(total_volume[i], radius * 100.0, cheight * 100.0)) / 1000.0;
                 Log.i("info", "원뿔 높이, 소숫점 떼기 전 : "+ result2);
                 height[i] = Math.round(result2 * 10000) / 10000.0;
+                if (height[i]!=0) total_height[i+1] = total_height[i] + height[i];
                 Log.i("info", "원뿔 높이 : "+height[i]);
 
                 Log.i("soyeon", "cheight * 100.0 : "+cheight * 100.0);
@@ -940,7 +958,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
                 float[] z_positions = calc_position(radius, midPosition, x_positions);
 
-                Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, 0, cheight);
+                Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, 0, cheight, null);
 
                 pose_list[0] = width_pose[0];
                 pose_list[13] = width_pose[1];
@@ -970,7 +988,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //일단 원을 서로 잇고, 거기를 불투명한 텍스쳐로 채워주는것 부터 한다.
                 //AnchorNode[] anchornodes = new AnchorNode[8]; 이부분이 8각형 찍은 부분, 0과 7번째 인덱스가 양 끝단
                 //아래 함수는 position 중심으로하고 nodes들을 2씩 묶어서 만들거임
-                iterative_guide_cone(count, radius, cone_rad, width_pose[2], height, cheight);
+                iterative_guide_cone(count, radius, cone_rad, width_pose[2], height, cheight, total_height);
                 //얘는 높이에 따라서 원들의 y값을 바꿔줘야 할듯..?
                 break;
             case "paper":
@@ -985,7 +1003,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
                 float[] z_positions3 = calc_position(radius, midPosition3, x_positions3);
 
-                Pose[] pose_list3 = make_pose(x_positions3, width_pose[0], z_positions3, 0, cheight);
+                Pose[] pose_list3 = make_pose(x_positions3, width_pose[0], z_positions3, count, cheight, null);
 
                 pose_list3[0] = width_pose[0];
                 pose_list3[13] = width_pose[1];
@@ -1020,7 +1038,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
                 float[] z_positions_under = calc_position(radius_under, midPosition_under, x_positions_under);
 
-                Pose[] pose_list_under = make_pose(x_positions_under, width_pose_under[0], z_positions_under, 0, cheight);
+                Pose[] pose_list_under = make_pose(x_positions_under, width_pose_under[0], z_positions_under, 0, cheight,null);
 
                 pose_list_under[0] = width_pose_under[0];
                 pose_list_under[13] = width_pose_under[1];
@@ -1046,6 +1064,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 AnchorNode[][] anchorNodesArray = {anchornodes3, anchornodes_under};
                 make_polygon(null, anchorNodesArray, midPosition_under, "square", new Color(255, 0, 0));
                 break;
+            //</editor-fold desc="원 만들어주는 과정">
             default:
                 break;
         }
@@ -1090,7 +1109,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
     }
     //반복적으로 호출해서진행시킬겅미
-    private void iterative_guide_cone(int count_,double rad, double[] radius_, Pose midPosition_, double[] heights, double cheight){
+    private void iterative_guide_cone(int count_,double rad, double[] radius_, Pose midPosition_, double[] heights, double cheight, double[] total_h){
         //14각형, 8개[0-7] x 포지션, 양끝단 노드 2개 빼면 12개 포지션들 필요
         float[] x_positions = new float[8];
         Log.i("info", "m단위 반지름"+rad);
@@ -1126,7 +1145,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         float[] z_positions = calc_position(radius_[count_], midPosition_, x_positions);
 
         //그걸로 포즈 리스트 만들기
-        Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_], cheight);
+        Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions ,count_, cheight, total_h);
 
         Session session = arFragment.getArSceneView().getSession();
         Anchor[] anchors = new Anchor[14];
@@ -1171,7 +1190,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 addedAnchorNode.setEnabled(false);
-                if(count_+1<recipe_count) iterative_guide_cone(count_+1, rad, radius_, midPosition_, heights, cheight);
+                if(count_+1<recipe_count) iterative_guide_cone(count_+1, rad, radius_, midPosition_, heights, cheight, total_h);
                 else out_btn.setVisibility(View.VISIBLE);
 
             }
@@ -1197,8 +1216,8 @@ public class CameraguideActivity extends AppCompatActivity implements
             //x포지션 넣기
             x[i] = tmp + i * cm;
 
-            //이 아래 부분 원의 방정식 이용했었는데 이부분이 좀 ........ 계속 Nan나오거나 E붙어서 나올때가 있음.
-            //이상하게 원뿔대에서는 잘 작동함
+            //(x-mid.tx())^2 + (z-mid.tz())^2 = radius^2 식 활용
+
             Log.i("info", "x[i] : "+x[i]);
 
             Log.i("info", "x- midx : "+(x[i] - midposition.tx()));
@@ -1225,7 +1244,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
     //가이드 밑면 원 그려줄 앵커들 포즈 생성하는 함수
     //Pose[] pose_list = make_pose(x_positions, width_pose[0], z_positions, heights[count_]);
-    private Pose[] make_pose(float[] x, Pose w_pos, float[] z, double height, double cheight) {
+    private Pose[] make_pose(float[] x, Pose w_pos, float[] z, int count_, double cheight, double[] total_h) {
         if (!(cupname.equals("cocktail"))){
             Pose[] p_list = new Pose[14];
             float[][] position = new float[12][];
@@ -1247,8 +1266,10 @@ public class CameraguideActivity extends AppCompatActivity implements
             float[] quat = {0.0f, 0.0f, 0.f, 0.0f};
 
             cheight = cheight / 100.0;
-            height = height / 100.0;
-
+            double height = total_h[count_] / 100.0;
+            Log.i("info",""+w_pos.ty());
+            Log.i("info",""+(w_pos.ty()-(cheight-height)));
+            Log.i("info",""+height_pose[1]);
             float[] pos = {x[0], (float) (w_pos.ty()-(cheight-height)), width_pose[0].tz()};
             Log.i("soyeon", "w_pos.ty(): "+w_pos.ty());
             Log.i("soyeon", "cheight-height: "+(cheight-height));
