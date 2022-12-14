@@ -80,7 +80,7 @@ public class CameraguideActivity extends AppCompatActivity implements
     private FloatingActionButton rightButton;
     private FloatingActionButton leftButton;
     private Button mug_cup_btn;
-    private Button wine_glass_btn;
+    private Button paper_cup_btn;
     private Button cocktail_glass_btn;
     private Button cancel_btn;
     private Button complete_btn;
@@ -115,7 +115,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 .show();
 //<editor-fold desc="변수 매칭구간">
         mug_cup_btn = findViewById(R.id.mug_cup_btn);
-        wine_glass_btn = findViewById(R.id.wine_glass_btn);
+        paper_cup_btn = findViewById(R.id.paper_cup_btn);
         cocktail_glass_btn = findViewById(R.id.cocktail_glass_btn);
         deleteButton = findViewById(R.id.delete);
         cancel_btn = findViewById(R.id.cancel_btn);
@@ -137,7 +137,6 @@ public class CameraguideActivity extends AppCompatActivity implements
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.arFragment, ArFragment.class, null)
                     .commit();
-
         }
 //<editor-fold desc="렌더러블 초기 설정">
         //Material 색상 지정하고, 그걸로 shapeFactory를 통해 랜더러블 구를 생성함 radius 0.01f
@@ -202,7 +201,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = 0;
                 create_mode = 1;
                 deleteButton.setVisibility(View.VISIBLE);
-                wine_glass_btn.setVisibility(View.GONE);
+                paper_cup_btn.setVisibility(View.GONE);
                 cocktail_glass_btn.setVisibility(View.GONE);
                 result_.setVisibility(View.VISIBLE);
                 complete_btn.setVisibility(View.VISIBLE);
@@ -240,7 +239,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
                     mug_cup_btn.setVisibility(View.VISIBLE);
-                    wine_glass_btn.setVisibility(View.VISIBLE);
+                    paper_cup_btn.setVisibility(View.VISIBLE);
                     cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
                     result_.setVisibility(View.GONE);
@@ -251,7 +250,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 }
             }
         });
-        wine_glass_btn.setOnClickListener(new Button.OnClickListener() {
+        paper_cup_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cancle = false;
@@ -261,7 +260,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = 0;
                 create_mode = 1;
                 deleteButton.setVisibility(View.VISIBLE);
-                wine_glass_btn.setVisibility(View.GONE);
+                paper_cup_btn.setVisibility(View.GONE);
                 cocktail_glass_btn.setVisibility(View.GONE);
                 result_.setVisibility(View.VISIBLE);
                 complete_btn.setVisibility(View.VISIBLE);
@@ -298,7 +297,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setTitleText("Oops...")
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
-                    wine_glass_btn.setVisibility(View.VISIBLE);
+                    paper_cup_btn.setVisibility(View.VISIBLE);
                     mug_cup_btn.setVisibility(View.VISIBLE);
                     cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
@@ -321,7 +320,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 numberOfAnchors = 0;
                 create_mode = 1;
                 deleteButton.setVisibility(View.VISIBLE);
-                wine_glass_btn.setVisibility(View.GONE);
+                paper_cup_btn.setVisibility(View.GONE);
                 cocktail_glass_btn.setVisibility(View.GONE);
                 result_.setVisibility(View.VISIBLE);
                 complete_btn.setVisibility(View.VISIBLE);
@@ -358,7 +357,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                             .setTitleText("Oops...")
                             .setContentText("카메라는 컵을 향하게 들어주세요!")
                             .show();
-                    wine_glass_btn.setVisibility(View.VISIBLE);
+                    paper_cup_btn.setVisibility(View.VISIBLE);
                     mug_cup_btn.setVisibility(View.VISIBLE);
                     cocktail_glass_btn.setVisibility(View.VISIBLE);
                     cancel_btn.setVisibility(View.GONE);
@@ -392,7 +391,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                         leftButton.setVisibility(View.GONE);
                         rightButton.setVisibility(View.GONE);
                         mug_cup_btn.setVisibility(View.GONE);
-                        wine_glass_btn.setVisibility(View.GONE);
+                        paper_cup_btn.setVisibility(View.GONE);
                         cocktail_glass_btn.setVisibility(View.GONE);
                         cancel_btn.setVisibility(View.GONE);
                         complete_btn.setVisibility(View.GONE);
@@ -414,7 +413,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                     leftButton.setVisibility(View.GONE);
                     rightButton.setVisibility(View.GONE);
                     mug_cup_btn.setVisibility(View.GONE);
-                    wine_glass_btn.setVisibility(View.GONE);
+                    paper_cup_btn.setVisibility(View.GONE);
                     cocktail_glass_btn.setVisibility(View.GONE);
                     cancel_btn.setVisibility(View.GONE);
                     complete_btn.setVisibility(View.GONE);
@@ -437,7 +436,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 //여기서는 모든걸 원점으로 되돌림,,
                 cancle = true;
                 mug_cup_btn.setVisibility(View.VISIBLE);
-                wine_glass_btn.setVisibility(View.VISIBLE);
+                paper_cup_btn.setVisibility(View.VISIBLE);
                 cocktail_glass_btn.setVisibility(View.VISIBLE);
                 complete_btn.setVisibility(View.GONE);
                 cancel_btn.setVisibility(View.GONE);
@@ -896,10 +895,16 @@ public class CameraguideActivity extends AppCompatActivity implements
                 height[i] = Math.round(result2 * 10000) / 10000.0;
                 Log.i("info", "원뿔 높이 : "+height[i]);
 
+                Log.i("soyeon", "cheight * 100.0 : "+cheight * 100.0);
+                Log.i("soyeon", "radius * 100.0 : "+radius * 100.0);
+                Log.i("soyeon", "height[i] : "+height[i] * 100.0);
+
                 //잘못될수있는부분 1. 원뿔반지름 잘구하고있는건지 모르겠음
                 //원뿔부피식을 이항해서 쓰는중인데
                 //부피가 계속 누적되어야 하니까 누적된 부피 넣어줬음
-                double result3 = (calculaterad_cone(total_volume[i], height[i] * 100.0)) / 1000.0;
+                //double radius, double height, double new_height
+                double result3 = (calculaterad_cone(radius * 100.0, cheight * 100.0, height[i] * 100.0));
+                Log.i("soyeon", "result3 : "+result3);
                 cone_rad[i] = Math.round(result3 * 1000) / 1000.0;
                 Log.i("info","원뿔 반지름 : "+cone_rad[i] );
             }
@@ -1027,6 +1032,7 @@ public class CameraguideActivity extends AppCompatActivity implements
                 make_polygon(anchornodes_under, null, midPosition_under, "circle", new Color(255, 0, 0));
                 AnchorNode[][] anchorNodesArray = {anchornodes3, anchornodes_under};
                 make_polygon(null, anchorNodesArray, midPosition_under, "square", new Color(255, 0, 0));
+                break;
             default:
                 break;
         }
@@ -1188,12 +1194,13 @@ public class CameraguideActivity extends AppCompatActivity implements
             float pow_rad = (float) (Math.round(pow_rad_ * 10000) / 10000.0);
 
             Log.i("info", "pow : "+pow_);
+            Log.i("info", "pow_rad_ : "+pow_rad_);
             Log.i("info", "pow_rad : "+pow_rad);
 
             Log.i("info", "tz : "+midposition.tz());
             Log.i("info", "sqrt : "+(Math.sqrt(pow_rad - pow_) + midposition.tz()));
             z_list[(2 * i) - 1] = (float) Math.sqrt(Math.pow(radius, 2) - Math.pow((x[i] - midposition.tx()), 2)) + midposition.tz();
-            z_list[2 * i] = (float) -Math.sqrt(Math.pow(radius, 2) - Math.pow((x[i] - midposition.tx()), 2)) + midposition.tz();
+            z_list[2 * i] = (float) ((float) -1*(Math.sqrt(Math.pow(radius, 2) - Math.pow((x[i] - midposition.tx()), 2))) + midposition.tz());
             Log.i("info", "z_list[i] : "+z_list[i]);
         }
         return z_list;
@@ -1282,8 +1289,9 @@ public class CameraguideActivity extends AppCompatActivity implements
     private double calculateHeight_cone(double amount, double radius, double height) {
         return  Math.pow((3 * Math.pow(height,2) * amount / (Math.PI * Math.pow(radius,2))), 1.0 / 3.0);
     }
-    private double calculaterad_cone(double amount, double height) {
-        return  Math.sqrt(( 3 * amount) / (Math.PI * height));
+    // 좁아진 반지름
+    private double calculaterad_cone(double radius, double height, double new_height) {
+        return (radius / height) * new_height;
     }
 
     //계량 높이 구해주는 함수 - 원뿔대

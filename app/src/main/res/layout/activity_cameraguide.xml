@@ -39,7 +39,7 @@
             android:visibility="gone" />
 
         <Button
-            android:id="@+id/wine_glass_btn"
+            android:id="@+id/paper_cup_btn"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="145dp"
