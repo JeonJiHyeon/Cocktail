@@ -562,7 +562,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             anchorNode.setRenderable(sphere); //아까 만든 구
 
             //노드가 너무 크면 의도치않은 오차 및 보기가 힘들어서 줄여버림
-            anchorNode.setLocalScale(new Vector3(0.7f, 0.7f, 0.7f));
+            anchorNode.setLocalScale(new Vector3(0.5f, 0.5f, 0.5f));
 
             anchorNodeList.add(anchorNode);
             numberOfAnchors++;
@@ -622,7 +622,7 @@ public class CameraguideActivity extends AppCompatActivity implements
         float mid_y = (anchorNodeList.get(0).getWorldPosition().y + anchorNodeList.get(1).getWorldPosition().y) / 2;
         float mid_z = (anchorNodeList.get(0).getWorldPosition().z + anchorNodeList.get(1).getWorldPosition().z) / 2;
         float[] mid = {mid_x, mid_y, mid_z};
-        float[] res_mid = {mid_x-0.03f, mid_y+0.05f, mid_z};
+        float[] res_mid = {mid_x, mid_y+0.05f, mid_z};
         float[] mid_q = {0.0f, 0.0f, 0.0f, 0.0f};
         Pose midPosition = new Pose(mid, mid_q);
         Pose resPosition = new Pose(res_mid, mid_q);
@@ -759,7 +759,7 @@ public class CameraguideActivity extends AppCompatActivity implements
             }
         });
         resultanchor.setRenderable(renderable_ui_result);
-        resultanchor.setLocalScale(new Vector3(0.2f, 0.2f, 0.2f));
+        resultanchor.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
 
         save_result(result, s);
     }
@@ -1100,7 +1100,7 @@ public class CameraguideActivity extends AppCompatActivity implements
 
 
         Random random = new Random();
-        Color color2 = new Color(android.graphics.Color.argb(100,255, random.nextInt(255), 0));
+        Color color2 = new Color(android.graphics.Color.argb(170,255, random.nextInt(255), 0));
 
 
 
